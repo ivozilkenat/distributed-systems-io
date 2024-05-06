@@ -12,5 +12,5 @@ def run_command(command, cwd=None):
         if not output and process.poll() is not None:
             break
         if output:
-            print(output.strip().decode())
+            print(output.strip().decode(errors="replace"))
             
