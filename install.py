@@ -32,6 +32,7 @@ def install_backend_dependencies():
     os.chdir("..")
 
 def main():
+    install_frontend_dependencies()
     install_backend_dependencies()
 
 if __name__ == "__main__":
