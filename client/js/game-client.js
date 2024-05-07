@@ -1,7 +1,7 @@
 const socket = io();
 
-const c = document.getElementById("gameCanvas");
-const ctx = c.getContext("2d");
+const canv = document.getElementById("gameCanvas");
+const ctx = canv.getContext("2d");
 
 let platypus = document.createElement("img");
 let map = document.createElement("img");
@@ -45,8 +45,6 @@ function draw_player(x,y){
     ctx.restore();
 }
 function draw(enemies, pos){
-    //ctx.fillStyle = "black";
-    //ctx.fillRect(0, 0, 500, 500);
     draw_background(pos[0],pos[1]);
     for(let enemy of enemies){
         draw_player(enemy[0],enemy[1]);
@@ -60,5 +58,13 @@ function draw(enemies, pos){
 socket.on("update_players", (data)=>{
     draw(data["players"], data["newpos"]);
 });
-//draw_enemies([]);
-//socket.emit("player_move", [Math.random()*500, Math.random()*500]);
+
+function joinGame(){
+    socket.connect();
+}
+
+function leaveGame(){
+    socket.disconnect();
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canv.width, canv.height)
+}
