@@ -1,4 +1,5 @@
 const socket = io();
+
 const c = document.getElementById("gameCanvas");
 const ctx = c.getContext("2d");
 
@@ -7,20 +8,20 @@ let map = document.createElement("img");
 platypus.src="assets/platypus.png";
 map.src = "assets/map.png";
 map.onload=function(){
-    draw_enemies([]);
+    draw([[150,150]],[250,250]);
 }
 
 kd.D.down(function(){
-    socket.emit("player_move", [1,0])
+    socket.emit("player_move", [2,0]);
 });
 kd.A.down(function(){
-    socket.emit("player_move", [-1,0])
+    socket.emit("player_move", [-2,0]);
 });
 kd.W.down(function(){
-    socket.emit("player_move", [0,-1])
+    socket.emit("player_move", [0,-2]);
 });
 kd.S.down(function(){
-    socket.emit("player_move", [0,1])
+    socket.emit("player_move", [0,2]);
 });
 
 kd.run(function () {
@@ -56,8 +57,8 @@ function draw(enemies, pos){
     ctx.fillText("X: "+pos[0]+", Y:"+pos[1], 10, 30);
 }
 
-socket.on("update_players", (players, newpos)=>{
-    draw(players, newpos);
+socket.on("update_players", (data)=>{
+    draw(data["players"], data["newpos"]);
 });
 //draw_enemies([]);
 //socket.emit("player_move", [Math.random()*500, Math.random()*500]);

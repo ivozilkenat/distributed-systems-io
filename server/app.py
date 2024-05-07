@@ -4,6 +4,8 @@ from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
+import random
+from typing import Dict
 import os
 
 # Constants
@@ -12,6 +14,52 @@ CLIENT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "..", "client")
 # FastAPI Setup & SocketManager (socket.io) Setup
 app = FastAPI()
 socket_manager = SocketManager(app=app, mount_location="/socket.io")
+
+# TODO: Maybe replace with sessions? Research required, https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers
+players: Dict[str, dict] = {}
+
+def random_position(n):
+    return random.randint(0, n)
+
+async def update_players(exclude_id=None):
+    for player_id, player in players.items():
+        if player_id == exclude_id:
+            continue
+        opponents = []
+        for opponent_id, opponent in players.items():
+            if player_id != opponent_id:
+                dx, dy = abs(player["x"] - opponent["x"]), abs(player["y"] - opponent["y"])
+                if dx <= 250 and dy <= 250:
+                    opponents.append([250 + (opponent["x"] - player["x"]), 250 + (opponent["y"] - player["y"])])
+        await app.sio.emit("update_players",{
+            "players": opponents,
+            "newpos": [player["x"], player["y"]]
+        } , room = player_id)
+
+@app.sio.on("player_move")
+async def player_move(sid, update):
+    players[sid]["x"] += update[0]
+    players[sid]["y"] += update[1]
+    players[sid]["x"] = min(500,max(0,players[sid]["x"]))
+    players[sid]["y"] = min(500,max(0,players[sid]["y"]))
+    await update_players()
+
+
+@app.sio.on('connect')
+async def client_side_receive_msg(sid,env):
+    print("Never gonna give you up")
+    players[sid] = {"x":random_position(500), "y":random_position(500)}
+    await update_players()
+
+@app.sio.on('disconnect')
+async def client_side_receive_msg(sid):
+    print("I let you down")
+    del players[sid]
+    await update_players()
+
+@app.sio.on('msg')
+async def client_side_receive_msg(sid, msg):
+    print("Msg receive from " +str(sid) +"and msg is : ",str(msg))
 
 # Middleware Setup
 app.add_middleware(
