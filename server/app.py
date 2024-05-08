@@ -16,6 +16,7 @@ app = FastAPI()
 socket_manager = SocketManager(app=app, mount_location="/socket.io")
 
 # TODO: Maybe replace with sessions? Research required, https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers
+# sid: {x, y, HP}
 players: Dict[str, dict] = {}
 
 def random_position(n):
@@ -33,7 +34,8 @@ async def update_players(exclude_id=None):
                     opponents.append([250 + (opponent["x"] - player["x"]), 250 + (opponent["y"] - player["y"])])
         await app.sio.emit("update_players",{
             "players": opponents,
-            "newpos": [player["x"], player["y"]]
+            "newpos": [player["x"], player["y"]],
+            "newHP": player["HP"]
         } , room = player_id)
 
 @app.sio.on("player_move")
@@ -47,19 +49,13 @@ async def player_move(sid, update):
 
 @app.sio.on('connect')
 async def client_side_receive_msg(sid,env):
-    print("Never gonna give you up")
-    players[sid] = {"x":random_position(500), "y":random_position(500)}
+    players[sid] = {"x":random_position(500), "y":random_position(500), "HP":100}
     await update_players()
 
 @app.sio.on('disconnect')
 async def client_side_receive_msg(sid):
-    print("I let you down")
     del players[sid]
     await update_players()
-
-@app.sio.on('msg')
-async def client_side_receive_msg(sid, msg):
-    print("Msg receive from " +str(sid) +"and msg is : ",str(msg))
 
 # Middleware Setup
 app.add_middleware(

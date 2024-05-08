@@ -7,6 +7,7 @@ let platypus = document.createElement("img");
 let map = document.createElement("img");
 platypus.src="assets/platypus.png";
 map.src = "assets/map.png";
+
 map.onload=function(){
     draw([[150,150]],[250,250]);
 }
@@ -44,7 +45,7 @@ function draw_player(x,y){
     ctx.drawImage(platypus, -platypus.width/2, -platypus.height/2)
     ctx.restore();
 }
-function draw(enemies, pos){
+function draw(enemies, pos, hp){
     draw_background(pos[0],pos[1]);
     for(let enemy of enemies){
         draw_player(enemy[0],enemy[1]);
@@ -53,10 +54,11 @@ function draw(enemies, pos){
     ctx.font = "20px serif";
     ctx.fillStyle = "white";
     ctx.fillText("X: "+pos[0]+", Y:"+pos[1], 10, 30);
+    ctx.fillText("HP: "+hp, 200, 30);
 }
 
 socket.on("update_players", (data)=>{
-    draw(data["players"], data["newpos"]);
+    draw(data["players"], data["newpos"], data["newHP"]);
 });
 
 function joinGame(){
@@ -66,5 +68,5 @@ function joinGame(){
 function leaveGame(){
     socket.disconnect();
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canv.width, canv.height)
+    ctx.fillRect(0, 0, canv.width, canv.height);
 }
