@@ -107,7 +107,7 @@ class Game:
             
             # Run this update at fixed intervals (e.g., 60 times per second)
             print("Broadcasting game state")
-            await asyncio.sleep(Game.Broadcast_INTERVAL)
+            await asyncio.sleep(Game.BROADCAST_INTERVAL)
 
     async def update_players(self, exclude_id=None) -> None:
         for player_id, player in self.socket_connections.items():
