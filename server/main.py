@@ -1,5 +1,6 @@
-from app import app
-import uvicorn
+from application.server import server
+import application.routing
+import application.websocketlogic
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=3000)
+    server.run()
