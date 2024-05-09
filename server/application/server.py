@@ -1,12 +1,12 @@
+import uvicorn
+import os
+import asyncio
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-import os
-import asyncio
-from typing import Dict
+from application.game import Game
 
 # templates = Jinja2Templates(directory=os.path.join(CLIENT_ROOT_DIR, "templates"))
 
@@ -55,75 +55,4 @@ class Server:
         server = uvicorn.Server(config)
         await server.serve()
         
-class Pos:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        
-    def __iter__(self):
-        return iter([self.x, self.y])
-
-
-class Player:
-    def __init__(self, pos: Pos, hp: int = 100) -> None:
-        self.pos = pos
-        self.hp = hp
-
-    def is_in_range_of(self, other) -> bool:
-        dx, dy = abs(self.pos.x - other.pos.x), abs(self.pos.y - other.pos.y)
-        return dx <= Game.X_MAX / 2 and dy <= Game.Y_MAX / 2
-
-
-class Game:
-    X_MAX = 500
-    Y_MAX = 500
-    STATE_UPDATE_INTERVAL = 1/60
-    BROADCAST_INTERVAL = 1/10
-    
-    def __init__(self, app) -> None:
-        self.app = app
-        self.socket_connections: Dict[str, Player] = {}
-        
-    def _get_game_tasks(self):
-        return [
-            asyncio.create_task(self.update_game_state()), 
-            asyncio.create_task(self.broadcast_game_state())
-        ]
-
-    async def update_game_state(self) -> None:
-        while True:
-            # Logic to update the game state
-            # For example, update player positions, check for collisions, etc.
-            
-            
-            # Run this update at fixed intervals (e.g., 60 times per second)
-            print("Updating game state")
-            await asyncio.sleep(Game.STATE_UPDATE_INTERVAL)
-            
-    async def broadcast_game_state(self) -> None:
-        while True:
-            # Logic to broadcast the game state to all connected clients
-            
-            
-            # Run this update at fixed intervals (e.g., 60 times per second)
-            print("Broadcasting game state")
-            await asyncio.sleep(Game.BROADCAST_INTERVAL)
-
-    async def update_players(self, exclude_id=None) -> None:
-        for player_id, player in self.socket_connections.items():
-            if player_id == exclude_id:
-                continue
-            opponent_positions = []
-            for opponent_id, opponent in self.socket_connections.items():
-                if player_id != opponent_id:
-                    if (player.is_in_range_of(opponent)):
-                        opponent_positions.append(
-                            [Game.X_MAX / 2 + (opponent.pos.x - player.pos.x), Game.Y_MAX / 2 + (opponent.pos.y - player.pos.y)])
-
-            await self.app.sio.emit("update_players", {
-                "players": opponent_positions,
-                "newpos": list(player.pos),
-                "newHP": player.hp
-            }, room=player_id)
-            
 server = Server()

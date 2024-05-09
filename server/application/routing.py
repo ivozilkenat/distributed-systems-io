@@ -1,6 +1,6 @@
-from application.server import server, Server
-from fastapi.responses import FileResponse
 import os
+from fastapi.responses import FileResponse
+from application.server import server, Server
 
 # Default Route Setups 
 # TODO: implement routers
