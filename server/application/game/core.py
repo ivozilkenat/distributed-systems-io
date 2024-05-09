@@ -1,8 +1,14 @@
+import random
+
 # Constants (dont work as static variables)
 X_MAX = 500
 Y_MAX = 500
 STATE_UPDATE_INTERVAL = 1/60
 BROADCAST_INTERVAL = 1/10
+
+def random_position(n):
+    return random.randint(0, n) # TODO: magic number
+
 
 class Pos:
     def __init__(self, x, y):

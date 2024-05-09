@@ -8,12 +8,10 @@ from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
 from application.game import Game
 
-# templates = Jinja2Templates(directory=os.path.join(CLIENT_ROOT_DIR, "templates"))
+CLIENT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "client")
+
 
 class Server:
-    # Server Constants
-    CLIENT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "client")
-    
     def __init__(self) -> None:
         # FastAPI Setup & SocketManager (socket.io) Setup
         self.app = FastAPI()
@@ -34,10 +32,11 @@ class Server:
         )
         
         # Static Files
-        self.app.mount("/html", StaticFiles(directory=os.path.join(Server.CLIENT_ROOT_DIR, "html")), name="html")
-        self.app.mount("/css", StaticFiles(directory=os.path.join(Server.CLIENT_ROOT_DIR, "css")), name="css")
-        self.app.mount("/js", StaticFiles(directory=os.path.join(Server.CLIENT_ROOT_DIR, "js")), name="js")
-        self.app.mount("/assets", StaticFiles(directory=os.path.join(Server.CLIENT_ROOT_DIR, "assets")), name="assets")
+        self.app.mount("/html", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "html")), name="html")
+        self.app.mount("/css", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "css")), name="css")
+        self.app.mount("/js", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "js")), name="js")
+        self.app.mount("/assets", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "assets")), name="assets")
+        # templates = Jinja2Templates(directory=os.path.join(CLIENT_ROOT_DIR, "templates"))
         
     # Run the server
     def run(self) -> None:

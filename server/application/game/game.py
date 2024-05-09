@@ -24,31 +24,35 @@ class Game:
             
             
             # Run this update at fixed intervals (e.g., 60 times per second)
-            print("Updating game state")
+            #print("Updating game state")
             await asyncio.sleep(STATE_UPDATE_INTERVAL)
             
     async def broadcast_game_state(self) -> None:
         while True:
             # Logic to broadcast the game state to all connected clients
             
+            await self.update_players()
             
             # Run this update at fixed intervals (e.g., 60 times per second)
-            print("Broadcasting game state")
+            #print("Broadcasting game state")
             await asyncio.sleep(BROADCAST_INTERVAL)
 
     async def update_players(self, exclude_id=None) -> None:
-        for player_id, player in self.socket_connections.items(): # TODO: size might change during iteration because of disconnects (copy?)
+        connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+        for player_id, player in connections: 
             if player_id == exclude_id:
                 continue
-            opponent_positions = []
-            for opponent_id, opponent in self.socket_connections.items():
-                if player_id != opponent_id:
-                    if (player.is_in_range_of(opponent)):
-                        opponent_positions.append(
-                            [X_MAX / 2 + (opponent.pos.x - player.pos.x), Y_MAX / 2 + (opponent.pos.y - player.pos.y)])
+            enemy_positions = {}
+            for opponent_id, opponent in connections:
+                if player_id == opponent_id:
+                    continue
+                if (player.is_in_range_of(opponent) or True): # TODO: currently always true for smooth interpolation (find different range metric, like max distance in one update on top)
+                    enemy_positions[opponent_id] = list(opponent.pos) # Id necessary for frontend to identify players (this is very ugly right now, refactor later)
+                        
 
+            # TODO: this is ugly, refactor
             await self.app.sio.emit("update_players", {
-                "players": opponent_positions,
+                "enemies": enemy_positions,
                 "newpos": list(player.pos),
                 "newHP": player.hp
             }, room=player_id)
