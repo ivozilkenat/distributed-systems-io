@@ -54,5 +54,3 @@ class Server:
         config = uvicorn.Config(self.app, host="127.0.0.1", port=3000)
         server = uvicorn.Server(config)
         await server.serve()
-        
-server = Server()
