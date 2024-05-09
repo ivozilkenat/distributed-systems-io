@@ -50,6 +50,6 @@ class Server:
         await asyncio.gather(*tasks)
         
     async def _run_uvicorn_server(self) -> None:
-        config = uvicorn.Config(self.app, host="127.0.0.1", port=3000)
+        config = uvicorn.Config(self.app, host="0.0.0.0", port=3000)
         server = uvicorn.Server(config)
         await server.serve()
