@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 from typing import Dict
 from .core import Player
-from .core import X_MAX, Y_MAX, STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL
+from application.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL
 
 
 class Game:    

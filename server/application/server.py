@@ -7,9 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
 from application.game import Game
-
-CLIENT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "client")
-
+from application.constants import CLIENT_ROOT_DIR
 
 class Server:
     def __init__(self) -> None:
@@ -50,6 +48,6 @@ class Server:
         await asyncio.gather(*tasks)
         
     async def _run_uvicorn_server(self) -> None:
-        config = uvicorn.Config(self.app, host="127.0.0.1", port=3000)
+        config = uvicorn.Config(self.app, host="0.0.0.0", port=3000)
         server = uvicorn.Server(config)
         await server.serve()

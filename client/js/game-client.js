@@ -103,22 +103,23 @@ class Game {
 
         // Draw the image
         ctx.drawImage(map, x, y);
-
-        // Set border style
-        ctx.strokeStyle = 'red'; // Color of the border
-        ctx.lineWidth = 5;       // Thickness of the border
-
-        // Draw a border around the image
-        // Assuming map is your image and has width and height properties
-        ctx.strokeRect(x, y, map.width, map.height);
-
         ctx.restore(); // Restore the context to previous state
+    }
+
+    draw_border() {
+        ctx.save();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 5;
+        let x = ctx.canvas.width / 2 - this.player.x;
+        let y = ctx.canvas.height / 2 - this.player.y;
+        ctx.strokeRect(x, y, map.width, map.height);
+        ctx.restore();
     }
 
     draw_clear() {
         ctx.save();
-        // Set the background color to red
-        ctx.fillStyle = 'red';
+        // Set the background color to image border color
+        ctx.fillStyle = '#BADA31';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.restore();
     }
@@ -126,6 +127,7 @@ class Game {
     draw() {
         this.draw_clear();
         this.draw_background();
+        this.draw_border();
         this.player.update_draw();
 
         // Draw each other player

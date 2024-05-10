@@ -1,10 +1,6 @@
 import random
-
-# Constants (dont work as static variables)
-X_MAX = 500
-Y_MAX = 500
-STATE_UPDATE_INTERVAL = 1/60
-BROADCAST_INTERVAL = 1/10
+import os
+from application.constants import X_MAX, Y_MAX
 
 def random_position(n):
     return random.randint(0, n) # TODO: magic number
