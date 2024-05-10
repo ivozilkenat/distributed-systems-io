@@ -8,7 +8,7 @@ let map = document.createElement("img");
 platypus.src = "assets/platypus.png";
 map.src = "assets/map.png";
 
-const UPDATE_INTERAVL_MS = 100;
+const UPDATE_INTERAVL_MS = 50;
 
 class Player {
     constructor(x, y) {
