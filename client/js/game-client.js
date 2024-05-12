@@ -196,4 +196,8 @@ function leaveGame() {
     ctx.fillRect(0, 0, canv.width, canv.height);
 }
 
+function goFullscreen() {
+    canv.requestFullscreen();
+}
+
 game.loop();
