@@ -1,14 +1,55 @@
 const socket = io();
 
-const canv = document.getElementById("gameCanvas");
-const ctx = canv.getContext("2d");
+// TODO: put app in Game constructor?
+const app = new PIXI.Application();
+const GAME_SIZE = [500,500]
+await app.init({ width: GAME_SIZE[0], height: GAME_SIZE[1] });
 
-let platypus = document.createElement("img");
-let map = document.createElement("img");
-platypus.src = "assets/platypus.png";
-map.src = "assets/map.png";
+document.getElementById("game").appendChild(app.canvas);
+
+await PIXI.Assets.load('/assets/platypus.png');
+await PIXI.Assets.load('/assets/map.png');
+await PIXI.Assets.load('/assets/leaveButton.png');
+await PIXI.Assets.load('/assets/joinButton.png');
 
 const UPDATE_INTERAVL_MS = 50;
+
+const keyMap = {
+    Space: 'space',
+    KeyW: 'up',
+    ArrowUp: 'up',
+    KeyA: 'left',
+    ArrowLeft: 'left',
+    KeyS: 'down',
+    ArrowDown: 'down',
+    KeyD: 'right',
+    ArrowRight: 'right',
+};
+
+let keys = {
+    "up":false,
+    "down":false,
+    "right":false,
+    "left":false
+}
+
+window.addEventListener('keydown', (evt) => {
+    if(!keyMap[evt.code])return;
+    keys[keyMap[evt.code]] = true;
+});
+window.addEventListener('keyup', (evt) => {
+    if(!keyMap[evt.code])return;
+    keys[keyMap[evt.code]] = false;
+});
+
+app.ticker.add((tick) => {
+    if(keys["right"])socket.emit("player_move",[1,0]);
+    if(keys["left"])socket.emit("player_move",[-1,0]);
+    if(keys["up"])socket.emit("player_move",[0,-1]);
+    if(keys["down"])socket.emit("player_move",[0,1]);
+});
+
+
 
 class Player {
     constructor(x, y) {
@@ -18,6 +59,15 @@ class Player {
         this.targetY = y;
         this.lastUpdateTime = Date.now();
         this.hp = 100; // Assuming HP is a property of the player
+        this.sprite = this.initSprite();
+    }
+
+    initSprite(){
+        let sprite = PIXI.Sprite.from('/assets/platypus.png');
+        sprite.anchor.set(0.5,0.5)
+        sprite.scale.set(0.1,0.1);
+        app.stage.addChild(sprite);
+        return sprite;
     }
 
     updatePosition(newX, newY) {
@@ -38,12 +88,7 @@ class Player {
     }
 
     draw_image(translation) {
-        ctx.save();
-        let [x, y] = translation(this.x, this.y);
-        ctx.translate(x, y);
-        ctx.scale(0.1, 0.1);
-        ctx.drawImage(platypus, -platypus.width / 2, -platypus.height / 2);
-        ctx.restore();
+        [this.sprite.x, this.sprite.y] = translation(this.x,this.y);
     }
 
     draw_debug() {
@@ -64,26 +109,48 @@ class Player {
 
     // Default translation to make player appear in the center of the canvas
     canvase_center_translation(x, y) {
-        return [ctx.canvas.width / 2, ctx.canvas.height / 2];
+        // TODO: global variables for width/height
+        return [GAME_SIZE[0]/2, GAME_SIZE[1]/2];
+        //return [ctx.canvas.width / 2, ctx.canvas.height / 2];
     }
 
     relative_to_player_translation(player) {
         return (x, y) => {
-            return [x - player.x + ctx.canvas.width / 2, y - player.y + ctx.canvas.height / 2]
+            return [x - player.x + GAME_SIZE[0] / 2, y - player.y + GAME_SIZE[1] / 2]
         }
     }
 
+    // a bit hacky but solves layer and removing disconnected players problem easily - change later (https://api.pixijs.io/@pixi/layers/Layer.html)
+    removeFromCanvas(){
+        app.stage.removeChild(this.sprite);
+    }
+    readdToCanvas(){
+        app.stage.addChild(this.sprite);
+    }
 }
 
 class Game {
     constructor() {
+        this.map = this.initMap();
         this.player = new Player(0, 0);
         this.enemies = {};
     }
 
-    loop() { // Is this smart?
-        requestAnimationFrame(this.loop.bind(this));
-        this.draw();
+    initMap(){
+        let map = PIXI.Sprite.from('/assets/map.png');
+        app.stage.addChild(map);
+        return map
+    }
+
+    loop() { // Is this smart? // Done with tick now, maybe come back to this later?
+        let game = this;
+        app.ticker.add((tick) => {
+            if(keys["right"])socket.emit("player_move",[1,0]);
+            if(keys["left"])socket.emit("player_move",[-1,0]);
+            if(keys["up"])socket.emit("player_move",[0,-1]);
+            if(keys["down"])socket.emit("player_move",[0,1]);
+            game.draw();
+        });
     }
 
     draw_hud() {
@@ -95,15 +162,9 @@ class Game {
     }
 
     draw_background() {
-        ctx.save();  // Save the current context state
-
-        // Calculate the image position
-        let x = ctx.canvas.width / 2 - this.player.x;
-        let y = ctx.canvas.height / 2 - this.player.y;
-
-        // Draw the image
-        ctx.drawImage(map, x, y);
-        ctx.restore(); // Restore the context to previous state
+        let x = GAME_SIZE[0] / 2 - this.player.x;
+        let y = GAME_SIZE[1] / 2 - this.player.y;
+        [this.map.x, this.map.y] = [x,y];
     }
 
     draw_border() {
@@ -116,60 +177,64 @@ class Game {
         ctx.restore();
     }
 
-    draw_clear() {
-        ctx.save();
-        // Set the background color to image border color
-        ctx.fillStyle = '#BADA31';
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.restore();
-    }
-
     draw() {
-        this.draw_clear();
         this.draw_background();
-        this.draw_border();
-        this.player.update_draw();
+        // this.draw_border();
 
         // Draw each other player
+
         Object.values(this.enemies).forEach(enemy => {
+            enemy.readdToCanvas();
             enemy.update_draw(enemy.relative_to_player_translation(this.player));
         });
 
-        this.draw_hud();
+        this.player.update_draw();
+        // this.draw_hud();
+    }
+
+    clearEnemies(){
+        // a bit hacky, but trust in the process
+        Object.values(game.enemies).forEach(enemy => {
+            enemy.removeFromCanvas()
+        });
     }
 }
 
-// map.onload = function () {
-//     draw([[150, 150]], [250, 250], 100);  // Initial draw call with dummy values
-// }
+// // map.onload = function () {
+// //     draw([[150, 150]], [250, 250], 100);  // Initial draw call with dummy values
+// // }
 
-game = new Game();
+let game = new Game();
 
-// Keyboard control setup using keydrown library
-kd.D.down(function () {
-    socket.emit("player_move", [2, 0]);
-});
-kd.A.down(function () {
-    socket.emit("player_move", [-2, 0]);
-});
-kd.W.down(function () {
-    socket.emit("player_move", [0, -2]);
-});
-kd.S.down(function () {
-    socket.emit("player_move", [0, 2]);
-});
+// // Keyboard control setup using keydrown library
+// kd.D.down(function () {
+//     socket.emit("player_move", [2, 0]);
+// });
+// kd.A.down(function () {
+//     socket.emit("player_move", [-2, 0]);
+// });
+// kd.W.down(function () {
+//     socket.emit("player_move", [0, -2]);
+// });
+// kd.S.down(function () {
+//     socket.emit("player_move", [0, 2]);
+// });
 
-kd.run(function () {
-    kd.tick();
-});
+// kd.run(function () {
+//     kd.tick();
+// });
 
 socket.on("update_players", (data) => {
     // Directly update self player from newpos
     game.player.updatePosition(data["newpos"][0], data["newpos"][1]);
     game.player.hp = data["newHP"];
 
-    // Handle other enemies using their IDs
+    // // Handle other enemies using their IDs
     const newPlayers = {};
+
+    // a bit hacky, but trust in the process
+    game.clearEnemies();
+
     Object.keys(data["enemies"]).forEach(id => {
         if (game.enemies[id]) {
             game.enemies[id].updatePosition(data["enemies"][id][0], data["enemies"][id][1]);
@@ -179,25 +244,40 @@ socket.on("update_players", (data) => {
         newPlayers[id] = game.enemies[id];
     });
 
-    // Replace the old enemies dictionary with the new one
+    // // Replace the old enemies dictionary with the new one
     game.enemies = newPlayers;
 });
 
+
+// Currently proof of concept
 function joinGame() {
     game.enemies = {};
     socket.connect();
+    app.stage.addChild(game.map, game.player.sprite);
 }
 
 function leaveGame() {
     socket.disconnect();
+    //while(app.stage.children[0]) { app.stage.removeChild(app.stage.children[0]); }
+    game.clearEnemies();
+    app.stage.removeChild(game.map, game.player.sprite);
     game.enemies = {};
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canv.width, canv.height);
 }
+const leaveButton = PIXI.Sprite.from('/assets/leaveButton.png');
+const joinButton = PIXI.Sprite.from('/assets/joinButton.png');
 
-function goFullscreen() {
-    canv.requestFullscreen();
-}
+leaveButton.on("click",leaveGame);
+leaveButton.eventMode = "static";
+joinButton.on("click",joinGame);
+joinButton.eventMode = "static";
+
+[leaveButton.x, leaveButton.y] = [0,400];
+[joinButton.x, joinButton.y] = [200,400];
+
+app.stage.addChild(leaveButton);
+app.stage.addChild(joinButton);
+// function goFullscreen() {
+//     canv.requestFullscreen();
+// }
 
 game.loop();
