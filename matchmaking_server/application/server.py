@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
-from application.game import Game
 from application.constants import CLIENT_ROOT_DIR
 
 class Server:

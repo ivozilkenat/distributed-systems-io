@@ -9,10 +9,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from application.game import Game
 from application.constants import CLIENT_ROOT_DIR
 
+origins = ["http://localhost:3000"]
+
+
 class Server:
     def __init__(self) -> None:
         # FastAPI Setup & SocketManager (socket.io) Setup
         self.app = FastAPI()
+
+
+        
         self._socket_manager = SocketManager(app=self.app, mount_location="/socket.io")
         
         self.game = Game(self.app)
@@ -23,7 +29,7 @@ class Server:
         # Middleware
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],  # Adjust this to more strict settings in production
+            allow_origins=[],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -42,6 +48,6 @@ class Server:
         await asyncio.gather(*tasks)
         
     async def _run_uvicorn_server(self) -> None:
-        config = uvicorn.Config(self.app, host="0.0.0.0", port=3000)
+        config = uvicorn.Config(self.app, host="0.0.0.0", port=3001)
         server = uvicorn.Server(config)
         await server.serve()

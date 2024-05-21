@@ -15,7 +15,7 @@ def install_backend_dependencies():
     """
     Set up a Python virtual environment and install backend dependencies.
     """
-    os.chdir('./server')
+    os.chdir('./matchmaking_server')
 
     if not os.path.exists('venv'):
         print("Setting up Python virtual environment...")
