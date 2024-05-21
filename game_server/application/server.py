@@ -29,12 +29,6 @@ class Server:
             allow_headers=["*"],
         )
         
-        # Static Files
-        self.app.mount("/html", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "html")), name="html")
-        self.app.mount("/css", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "css")), name="css")
-        self.app.mount("/js", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "js")), name="js")
-        self.app.mount("/assets", StaticFiles(directory=os.path.join(CLIENT_ROOT_DIR, "assets")), name="assets")
-        # templates = Jinja2Templates(directory=os.path.join(CLIENT_ROOT_DIR, "templates"))
         
     # Run the server
     def run(self) -> None:
