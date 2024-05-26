@@ -1,4 +1,10 @@
-const socket = io.connect(':3001');
+function getServerUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('serverUrl') || 'http://0.0.0.0:3001';
+}
+
+const serverUrl = getServerUrl(); 
+const socket = io.connect(serverUrl);
 
 // TODO: put app in Game constructor?
 const app = new PIXI.Application();
