@@ -200,29 +200,7 @@ class Game {
     }
 }
 
-// // map.onload = function () {
-// //     draw([[150, 150]], [250, 250], 100);  // Initial draw call with dummy values
-// // }
-
 let game = new Game();
-
-// // Keyboard control setup using keydrown library
-// kd.D.down(function () {
-//     socket.emit("player_move", [2, 0]);
-// });
-// kd.A.down(function () {
-//     socket.emit("player_move", [-2, 0]);
-// });
-// kd.W.down(function () {
-//     socket.emit("player_move", [0, -2]);
-// });
-// kd.S.down(function () {
-//     socket.emit("player_move", [0, 2]);
-// });
-
-// kd.run(function () {
-//     kd.tick();
-// });
 
 socket.on("update_players", (data) => {
     // Directly update self player from newpos
