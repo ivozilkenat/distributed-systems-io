@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs
 
 RUN python ./service_setup_helpers/install.py
+RUN ls
 
 # Expose the port the server listens on
 EXPOSE 3000
