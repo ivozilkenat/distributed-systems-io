@@ -30,10 +30,11 @@ class Pos:
 
 
 class Player:
-    def __init__(self, pos: Pos, hp: int = 100) -> None:
+    def __init__(self, game, pos: Pos, hp: int = 100) -> None:
+        self.game = game
         self.pos = pos
         self.hp = hp
-        self.name = "Player #1"
+        self.name = "Player #" + str(random.randint(0, 1000))
         self.kills = 0
         self.last_respawned_at = datetime.datetime.now()
         self.equipped_weapon = "Pistol"
@@ -53,7 +54,7 @@ class Player:
         self.last_respawned_at = now
         self.kills = 0
         self.hp = 100
-        # TODO maybe change position?
+        # TODO: respawn player at random position
         return delta
     
     def is_hit_by(self, origin, angle) -> bool:
@@ -68,24 +69,26 @@ class Player:
 
     def killed(self, victim):
         self.kills += 1
+        print(f"{self.name} sent {victim.name} to the shadow realm!")
         # TODO communicate kill to frontend
     
     def killed_by(self, killer):
         killer.killed(self)
         # TODO communicate death to frontend
 
-    def shoot(self, angle, enemies):
-        with open('weapons.json') as f:
-            weapons = json.load(f)
-        weapon = weapons[self.equipped_weapon]
+    def shoot(self, angle):
         if self.cooldown > 0:
             return
-        self.cooldown = weapon['cooldown']
+        weapon = self.game.weapons[self.equipped_weapon]
         hit_enemy = None
-        for enemy in enemies:
+        for _, enemy in self.game.socket_connections.items():
+            if enemy == self:
+                continue
             if self.is_in_range_of(enemy, weapon['range']) & enemy.is_hit_by(self.pos, angle):
                 if hit_enemy is None or self.pos.distance_to(enemy.pos) < self.pos.distance_to(hit_enemy.pos):
                     hit_enemy = enemy
-        hit_enemy.damage(weapon['damage'])
-
+        damage = weapon["damage"]
+        if hit_enemy != None:
+            print(f"{self.name} touched {hit_enemy.name} in their no-no square.")
+            hit_enemy.take_damage(damage, self)
     

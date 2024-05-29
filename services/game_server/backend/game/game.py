@@ -1,15 +1,19 @@
 import asyncio
+import json
+import os
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 from typing import Dict
 from .core import Player
-from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL
+from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
 
 
 class Game:    
     def __init__(self, app) -> None:
         self.app: FastAPI = app
         self.socket_connections: Dict[str, Player] = {}
+        with open(os.path.join(DATA_DIR, "weapons.json")) as f:
+            self.weapons = json.load(f)
         
     def _get_game_tasks(self):
         return [

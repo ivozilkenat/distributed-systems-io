@@ -19,6 +19,7 @@ await PIXI.Assets.load('/assets/leaveButton.png');
 await PIXI.Assets.load('/assets/joinButton.png');
 
 const UPDATE_INTERAVL_MS = 50;
+const MAXHP = 100; //TODO make this dynamic
 
 
 export class Game {
@@ -105,6 +106,41 @@ export class Player {
         this.lastUpdateTime = Date.now();
         this.hp = 100; // Assuming HP is a property of the player
         this.sprite = this.initSprite();
+        this.healthBar = this.initHealthbar();
+    }
+
+    // ui drawing
+    initHealthbar() {
+        const hpBar = new PIXI.Container();
+        hpBar.addChild(this.createBar(1, 0x000001));
+        hpBar.addChild(this.createBar(1, 0xFF0000));
+        hpBar.pivot.set(0.5, 0.5);
+        app.stage.addChild(hpBar);
+        return hpBar;
+    }
+
+    updateHealthbar() {
+        this.healthBar.x = this.sprite.x - 62;
+        this.healthBar.y = this.sprite.y + 20;
+        this.redrawBar(this.healthBar.getChildAt(1), this.hp / MAXHP, 0xFF0000);
+    }
+
+    redrawBar(bar, fill, color) {
+        bar.clear();
+        bar.beginFill(color);
+        bar.drawPolygon([
+            12, 10, 
+            12 + (100 * fill), 10,
+            8 + (100 * fill), 20, 
+            8, 20
+        ]);
+        bar.endFill();
+    }
+
+    createBar(fill, color){
+        let bar = new PIXI.Graphics();
+        this.redrawBar(bar, fill, color);
+        return bar;
     }
 
     initSprite(){
@@ -226,6 +262,9 @@ socket.on("update_players", (data) => {
     game.player.updatePosition(data["newpos"][0], data["newpos"][1]);
     game.player.hp = data["newHP"];
 
+    //update UI
+    game.player.updateHealthbar();
+
     // // Handle other enemies using their IDs
     const newPlayers = {};
 
@@ -244,6 +283,8 @@ socket.on("update_players", (data) => {
     // // Replace the old enemies dictionary with the new one
     game.enemies = newPlayers;
 });
+
+
 
 
 // Currently proof of concept
