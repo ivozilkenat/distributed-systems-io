@@ -4,7 +4,7 @@ def install_frontend_dependencies():
     """
     Install frontend JavaScript dependencies using npm.
     """
-    os.chdir(os.path.join(os.getcwd(), "client"))
+    os.chdir(os.path.join(os.getcwd(), FRONTEND_DIR))
 
     print("Installing frontend dependencies using npm...")
     run_command('npm install')
@@ -15,7 +15,7 @@ def install_backend_dependencies():
     """
     Set up a Python virtual environment and install backend dependencies.
     """
-    os.chdir('./matchmaking_server')
+    os.chdir(os.path.join(os.getcwd(), BACKEND_DIR))
 
     if not os.path.exists('venv'):
         print("Setting up Python virtual environment...")

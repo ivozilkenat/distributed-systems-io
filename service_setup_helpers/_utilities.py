@@ -2,6 +2,9 @@ import os
 import subprocess
 import sys
 
+BACKEND_DIR = "backend"
+FRONTEND_DIR = "frontend"
+
 def run_command(command, cwd=None):
     """
     Run a shell command in a specified directory and print the output.
