@@ -4,6 +4,7 @@ def install_frontend_dependencies():
     """
     Install frontend JavaScript dependencies using npm.
     """
+    
     os.chdir(os.path.join(os.getcwd(), FRONTEND_DIR))
 
     print("Installing frontend dependencies using npm...")
