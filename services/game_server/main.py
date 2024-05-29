@@ -1,6 +1,6 @@
-from application.server import Server
-from application.highscores_api import HighscoresAPI
-from application.websocket_handler import setup_ws_handler
+from backend.server import Server
+from backend.highscores_api import HighscoresAPI
+from backend.websocket_handler import setup_ws_handler
 
 if __name__ == "__main__":
     server = Server()

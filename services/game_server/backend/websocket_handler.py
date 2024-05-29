@@ -1,8 +1,8 @@
-from application.server import Server
-from application.highscores_api import HighscoresAPI
-from application.game import Game
-from application.game.core import Pos, Player, random_position
-from application.game.core import X_MAX, Y_MAX
+from backend.server import Server
+from backend.highscores_api import HighscoresAPI
+from backend.game import Game
+from backend.game.core import Pos, Player, random_position
+from backend.game.core import X_MAX, Y_MAX
 
 # TODO: Maybe replace with sessions? Research required, https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers
 # TODO: Please no magic numbers everywhere

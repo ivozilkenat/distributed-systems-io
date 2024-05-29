@@ -1,4 +1,4 @@
-from _utilities import *
+from service_setup_helpers._utilities import *
 
 def install_frontend_dependencies():
     """

@@ -2,10 +2,10 @@ import os
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
-from application.server import Server
-from application.database import Database
-from application.constants import CLIENT_ROOT_DIR
-from application.models import Highscore
+from backend.server import Server
+from backend.database import Database
+from backend.constants import FRONTEND_ROOT_DIR
+from backend.models import Highscore
 
 # Default Route Setups 
 # TODO: implement routers
@@ -14,15 +14,15 @@ def setup_route_handler(server: Server, database: Database):
  
     @server.app.get("/")
     async def root():
-        return FileResponse(os.path.join(CLIENT_ROOT_DIR, "html", "index.html"))
+        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "index.html"))
 
     @server.app.get("/game")
     async def root():
-        return FileResponse(os.path.join(CLIENT_ROOT_DIR, "html", "game.html"))
+        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "game.html"))
 
     @server.app.get("/modules/socket.io.js")
     async def socketio_src():
-        return FileResponse(os.path.join(CLIENT_ROOT_DIR, "node_modules", "socket.io", "client-dist", "socket.io.js"))
+        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "node_modules", "socket.io", "client-dist", "socket.io.js"))
 
     @server.app.get('/servers')
     def get_servers():

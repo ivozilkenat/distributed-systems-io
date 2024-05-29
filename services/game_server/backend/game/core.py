@@ -2,7 +2,7 @@ import datetime
 import random
 import os
 import math
-from application.constants import X_MAX, Y_MAX
+from backend.constants import X_MAX, Y_MAX
 
 def random_position(n):
     return random.randint(0, n) # TODO: magic number
