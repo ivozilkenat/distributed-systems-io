@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
-    environment:
-      - APP_DATABASE_HOST=db
+    env_file:
+      - .env
     depends_on:
       - db
     labels:
