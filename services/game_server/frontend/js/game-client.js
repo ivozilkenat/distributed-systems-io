@@ -1,6 +1,6 @@
 function getServerUrl() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('serverUrl') || 'http://0.0.0.0:3001';
+    return params.get('serverUrl') || 'http://localhost:3001';
 }
 
 const serverUrl = getServerUrl(); 

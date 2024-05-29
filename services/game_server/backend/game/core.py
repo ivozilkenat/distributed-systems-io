@@ -44,6 +44,7 @@ class Player:
         return self.pos.distance_to(other.pos) <= range
     
     def is_in_visual_range_of(self, other) -> bool:
+        return True #TODO: change back
         dx, dy = self.x_distance_to(other), self.y_distance_to(other)
         return dx <= X_MAX / 2 and dy <= Y_MAX / 2
     
