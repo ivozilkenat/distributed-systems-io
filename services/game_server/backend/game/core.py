@@ -1,6 +1,7 @@
 import datetime
 import random
 import os
+import math
 from backend.constants import X_MAX, Y_MAX
 
 def random_position(n):
@@ -23,6 +24,7 @@ class Player:
         self.name = "Player #1"
         self.kills = 0
         self.last_respawned_at = datetime.datetime.now()
+        self.equipped_weapon = "Pistol"
 
     def is_in_range_of(self, other) -> bool:
         dx, dy = abs(self.pos.x - other.pos.x), abs(self.pos.y - other.pos.y)
@@ -36,3 +38,8 @@ class Player:
         self.hp = 100
         # TODO maybe change position?
         return delta
+    
+    def shoot(self, angle, enemies):
+        self.pos.x += math.cos(angle) * 100
+        self.pos.y += math.sin(angle) * 100
+    

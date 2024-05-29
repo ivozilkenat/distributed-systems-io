@@ -8,7 +8,7 @@ const socket = io.connect(serverUrl);
 
 // TODO: put app in Game constructor?
 const app = new PIXI.Application();
-const GAME_SIZE = [500,500]
+const GAME_SIZE = [2500,1000]
 await app.init({ width: GAME_SIZE[0], height: GAME_SIZE[1] });
 
 document.getElementById("game").appendChild(app.canvas);
@@ -31,6 +31,10 @@ export class Game {
     initMap(){
         let map = PIXI.Sprite.from('/assets/map.png');
         app.stage.addChild(map);
+        map.interactive = true;
+        map.on('click', (evt) => {
+            socket.emit("player_click", Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2));
+        });
         return map
     }
 
@@ -106,7 +110,7 @@ export class Player {
     initSprite(){
         let sprite = PIXI.Sprite.from('/assets/platypus.png');
         sprite.anchor.set(0.5,0.5)
-        sprite.scale.set(0.1,0.1);
+        sprite.scale.set(0.1,0.1); // TODO remove magic numbers
         app.stage.addChild(sprite);
         return sprite;
     }
@@ -198,6 +202,9 @@ window.addEventListener('keyup', (evt) => {
     if(!keyMap[evt.code])return;
     keys[keyMap[evt.code]] = false;
 });
+window.addEventListener('click', (evt) => {
+    return 0;
+});
 
 app.ticker.add((tick) => {
     if(keys["right"])socket.emit("player_move",[1,0]);
@@ -213,24 +220,6 @@ app.ticker.add((tick) => {
 // // }
 
 let game = new Game();
-
-// // Keyboard control setup using keydrown library
-// kd.D.down(function () {
-//     socket.emit("player_move", [2, 0]);
-// });
-// kd.A.down(function () {
-//     socket.emit("player_move", [-2, 0]);
-// });
-// kd.W.down(function () {
-//     socket.emit("player_move", [0, -2]);
-// });
-// kd.S.down(function () {
-//     socket.emit("player_move", [0, 2]);
-// });
-
-// kd.run(function () {
-//     kd.tick();
-// });
 
 socket.on("update_players", (data) => {
     // Directly update self player from newpos
