@@ -1,4 +1,4 @@
-name: Build and Publish Game Docker Image
+name: Build and Publish "Game" Docker Image
 
 on:
   push:

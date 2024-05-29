@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  matchmaking:
+    image: ${MATCHMAKING_IMAGE}
+    container_name: matchmaking
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      - APP_DATABASE_HOST=db
+    depends_on:
+      - db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matchmaking.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.matchmaking.entrypoints=web"
+
+  game:
+    image: ${GAME_IMAGE}
+    restart: unless-stopped
+    networks:
+      - backend
+    deploy:
+      replicas: 3 # Adjust the number of replicas as needed
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.game.rule=Host(`${DOMAIN}`) && PathPrefix(`/lobby`)"
+      - "traefik.http.routers.game.entrypoints=web"
+      - "traefik.http.services.game.loadbalancer.server.port=8001"
+
+  db:
+    image: ${DATABASE_IMAGE}
+    container_name: db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - database:/var/lib/mysql:Z
+    networks:
+      - backend
+
+  traefik:
+    image: traefik:v2.4
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
+
+volumes:
+  database:
+
+networks:
+  backend:
