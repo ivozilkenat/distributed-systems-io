@@ -4,12 +4,18 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from backend.server import Server
 from backend.database import Database
+from backend.constants import FRONTEND_ROOT_DIR
 from backend.models import Highscore
 
 # Default Route Setups 
 # TODO: implement routers
 
 def setup_route_handler(server: Server, database: Database):
+ 
+    @server.app.get("/")
+    async def root():
+        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "index.html"))
+
     @server.app.get('/servers')
     def get_servers():
         servers = [
