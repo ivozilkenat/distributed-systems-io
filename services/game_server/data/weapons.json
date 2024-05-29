@@ -1,0 +1,12 @@
+{
+    "Pistol": {
+        "damage": 50,
+        "cooldown": 1,
+        "range": 5000
+    },
+    "Rocket Launcher": {
+        "damage": 80,
+        "cooldown": 3,
+        "range": 2000
+    }
+}

@@ -1,0 +1,40 @@
+name: Build and Publish "Database" Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/database/Dockerfile'
+      - 'services/database/initial-database.sql'
+      - '.env'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-database
+
+jobs:
+  build-and-push-db:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push database Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./services/database
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
