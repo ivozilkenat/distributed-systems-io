@@ -6,35 +6,34 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
-from backend.game import Game
 from backend.constants import FRONTEND_ROOT_DIR
-
-origins = ["http://localhost:3000"]
-
+from backend.game import Game
 
 class Server:
     def __init__(self) -> None:
         # FastAPI Setup & SocketManager (socket.io) Setup
         self.app = FastAPI()
-
-
+        self._setup()
         
         self._socket_manager = SocketManager(app=self.app, mount_location="/socket.io")
-        
         self.game = Game(self.app)
-        
-        self._setup()
         
     def _setup(self) -> None:
         # Middleware
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=[],
+            allow_origins=["*"],  # Adjust this to more strict settings in production
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
         )
         
+        # Static Files
+        self.app.mount("/html", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "html")), name="html")
+        self.app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "css")), name="css")
+        self.app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "js")), name="js")
+        self.app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "assets")), name="assets")
+        # templates = Jinja2Templates(directory=os.path.join(FRONTEND_ROOT_DIR, "templates"))
         
     # Run the server
     def run(self) -> None:

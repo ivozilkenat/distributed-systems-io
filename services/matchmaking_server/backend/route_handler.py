@@ -16,14 +16,6 @@ def setup_route_handler(server: Server, database: Database):
     async def root():
         return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "index.html"))
 
-    @server.app.get("/game")
-    async def root():
-        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "game.html"))
-
-    @server.app.get("/modules/socket.io.js")
-    async def socketio_src():
-        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "node_modules", "socket.io", "client-dist", "socket.io.js"))
-
     @server.app.get('/servers')
     def get_servers():
         servers = [
