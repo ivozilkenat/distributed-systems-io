@@ -24,6 +24,11 @@ def setup_ws_handler(server: Server, highscores_api: HighscoresAPI):
        #  await server.game.update_players() #<- done by game
 
 
+    @server.app.sio.on("player_click")
+    async def player_shoot(sid, angle):
+        player = server.game.socket_connections[sid]
+        player.shoot(angle)
+
     @server.app.sio.on('connect')
     async def client_side_receive_msg(sid, env):
         server.game.socket_connections[sid] = Player(Pos(random_position(X_MAX), random_position(Y_MAX)))
