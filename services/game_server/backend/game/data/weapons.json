@@ -1,12 +1,12 @@
 {
     "Pistol": {
         "damage": 5,
-        "delay": 1,
+        "cooldown": 1,
         "range": 5
     },
     "Rocket Launcher": {
         "damage": 80,
-        "delay": 3,
+        "cooldown": 3,
         "range": 200
     }
 }

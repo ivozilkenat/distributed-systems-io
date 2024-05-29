@@ -27,7 +27,8 @@ def setup_ws_handler(server: Server, highscores_api: HighscoresAPI):
     @server.app.sio.on("player_click")
     async def player_shoot(sid, angle):
         player = server.game.socket_connections[sid]
-        player.shoot(angle)
+        if player.cooldown == 0:
+            player.shoot(angle)
 
     @server.app.sio.on('connect')
     async def client_side_receive_msg(sid, env):
