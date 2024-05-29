@@ -44,7 +44,7 @@ class Player:
         return self.pos.distance_to(other.pos) <= range
     
     def is_in_visual_range_of(self, other) -> bool:
-        dx, dy = self.x_distance_to(other), self.y_distance_to(other)
+        dx, dy = self.pos.x_distance_to(other.pos), self.pos.y_distance_to(other.pos)
         return dx <= X_MAX / 2 and dy <= Y_MAX / 2
     
     def respawn_and_get_survival_time(self) -> datetime:
