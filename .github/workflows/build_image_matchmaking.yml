@@ -38,5 +38,4 @@ jobs:
         with:
           context: ./services/matchmaking_server
           push: true
-          tags: ${{ steps.meta_matchmaking.outputs.tags }}
-          labels: ${{ steps.meta_matchmaking.outputs.labels }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

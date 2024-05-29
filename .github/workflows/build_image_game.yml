@@ -38,5 +38,4 @@ jobs:
         with:
           context: ./services/game_server
           push: true
-          tags: ${{ steps.meta_game.outputs.tags }}
-          labels: ${{ steps.meta_game.outputs.labels }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
