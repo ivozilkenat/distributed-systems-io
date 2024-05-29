@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs
 
-RUN python install.py
+RUN python ./service_setup_helpers/install.py
 
 # Expose the port the server listens on
 EXPOSE 3000
