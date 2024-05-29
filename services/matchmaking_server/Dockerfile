@@ -18,4 +18,4 @@ RUN python ./service_setup_helpers/install.py
 EXPOSE 3000
 
 
-CMD ["python3", "start.py"]
+CMD ["python3", "./service_setup_helpers/start.py"]
