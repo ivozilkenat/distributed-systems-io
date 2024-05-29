@@ -46,9 +46,10 @@ class Game:
             for opponent_id, opponent in connections:
                 if player_id == opponent_id:
                     continue
-                if (player.is_in_range_of(opponent) or True): # TODO: currently always true for smooth interpolation (find different range metric, like max distance in one update on top)
+                if (player.is_in_visual_range_of(opponent) or True): # TODO: currently always true for smooth interpolation (find different range metric, like max distance in one update on top)
                     enemy_positions[opponent_id] = list(opponent.pos) # Id necessary for frontend to identify players (this is very ugly right now, refactor later)
                         
+            player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
 
             # TODO: this is ugly, refactor
             await self.app.sio.emit("update_players", {
