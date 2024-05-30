@@ -18,7 +18,7 @@ await PIXI.Assets.load('/assets/map.png');
 await PIXI.Assets.load('/assets/leaveButton.png');
 await PIXI.Assets.load('/assets/joinButton.png');
 
-const UPDATE_INTERAVL_MS = 50;
+const UPDATE_INTERVAL_MS = 50;
 const MAXHP = 100; //TODO make this dynamic
 
 
@@ -162,7 +162,7 @@ export class Player {
     interpolatePosition() {
         const now = Date.now();
         const timeSinceUpdate = now - this.lastUpdateTime;
-        const updateInterval = UPDATE_INTERAVL_MS; // Expected update interval in milliseconds
+        const updateInterval = UPDATE_INTERVAL_MS; // Expected update interval in milliseconds
         const t = Math.min(1, timeSinceUpdate / updateInterval);
         this.x = this.x + (this.targetX - this.x) * t
         this.y = this.y + (this.targetY - this.y) * t
