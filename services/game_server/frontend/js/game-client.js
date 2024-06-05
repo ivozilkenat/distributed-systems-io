@@ -22,6 +22,15 @@ const UPDATE_INTERVAL_MS = 50;
 const MAXHP = 100; //TODO make this dynamic
 
 
+let barContext = new PIXI.GraphicsContext()
+    .poly([
+        12, 10, 
+        12 + (100), 10,
+        8 + (100), 20, 
+        8, 20
+    ])
+    .fill('white')
+
 export class Game {
     constructor() {
         this.map = this.initMap();
@@ -34,7 +43,9 @@ export class Game {
         app.stage.addChild(map);
         map.interactive = true;
         map.on('click', (evt) => {
-            socket.emit("player_click", Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2));
+            if(this.player.canShoot) {
+                socket.emit("player_click", Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2));
+            }
         });
         return map
     }
@@ -105,49 +116,50 @@ export class Player {
         this.targetY = y;
         this.lastUpdateTime = Date.now();
         this.hp = 100; // Assuming HP is a property of the player
-        this.sprite = this.initSprite();
+        this.container = this.initContainer();
         this.healthBar = this.initHealthbar();
+        this.updateHealthbar();
+        this.canShoot = false;
     }
 
     // ui drawing
     initHealthbar() {
-        const hpBar = new PIXI.Container();
-        hpBar.addChild(this.createBar(1, 0x000001));
-        hpBar.addChild(this.createBar(1, 0xFF0000));
+        let hpBar = new PIXI.Container();
+        hpBar.addChild(new PIXI.Graphics(barContext));
+        hpBar.addChild(new PIXI.Graphics());
         hpBar.pivot.set(0.5, 0.5);
-        app.stage.addChild(hpBar);
+        this.container.addChild(hpBar);
+        hpBar.x = -62;
+        hpBar.y = 20;
         return hpBar;
     }
 
     updateHealthbar() {
-        this.healthBar.x = this.sprite.x - 62;
-        this.healthBar.y = this.sprite.y + 20;
-        this.redrawBar(this.healthBar.getChildAt(1), this.hp / MAXHP, 0xFF0000);
+        this.redrawBar(this.healthBar.getChildAt(1), this.hp / MAXHP, "red");
     }
 
     redrawBar(bar, fill, color) {
         bar.clear();
-        bar.beginFill(color);
         bar.drawPolygon([
             12, 10, 
             12 + (100 * fill), 10,
             8 + (100 * fill), 20, 
             8, 20
         ]);
-        bar.endFill();
+        bar.fill(color);
     }
-
-    createBar(fill, color){
-        let bar = new PIXI.Graphics();
-        this.redrawBar(bar, fill, color);
-        return bar;
+    
+    initContainer(){
+        let container = new PIXI.Container();
+        container.addChild(this.initSprite());
+        app.stage.addChild(container);
+        return container;
     }
-
+    
     initSprite(){
         let sprite = PIXI.Sprite.from('/assets/platypus.png');
         sprite.anchor.set(0.5,0.5)
         sprite.scale.set(0.1,0.1); // TODO remove magic numbers
-        app.stage.addChild(sprite);
         return sprite;
     }
 
@@ -169,7 +181,7 @@ export class Player {
     }
 
     draw_image(translation) {
-        [this.sprite.x, this.sprite.y] = translation(this.x,this.y);
+        [this.container.x, this.container.y] = translation(this.x,this.y);
     }
 
     draw_debug() {
@@ -203,10 +215,10 @@ export class Player {
 
     // a bit hacky but solves layer and removing disconnected players problem easily - change later (https://api.pixijs.io/@pixi/layers/Layer.html)
     removeFromCanvas(){
-        app.stage.removeChild(this.sprite);
+        app.stage.removeChild(this.container);
     }
     readdToCanvas(){
-        app.stage.addChild(this.sprite);
+        app.stage.addChild(this.container);
     }
 }
 
@@ -238,9 +250,6 @@ window.addEventListener('keyup', (evt) => {
     if(!keyMap[evt.code])return;
     keys[keyMap[evt.code]] = false;
 });
-window.addEventListener('click', (evt) => {
-    return 0;
-});
 
 app.ticker.add((tick) => {
     if(keys["right"])socket.emit("player_move",[1,0]);
@@ -260,10 +269,15 @@ let game = new Game();
 socket.on("update_players", (data) => {
     // Directly update self player from newpos
     game.player.updatePosition(data["newpos"][0], data["newpos"][1]);
-    game.player.hp = data["newHP"];
-
-    //update UI
-    game.player.updateHealthbar();
+    
+    if (game.player.hp != data["newHP"]) {
+        game.player.hp = data["newHP"];
+        //update UI
+        console.log("changing player health")
+        game.player.updateHealthbar();
+    }
+    game.player.canShoot = data["canShoot"];
+    
 
     // // Handle other enemies using their IDs
     const newPlayers = {};
@@ -274,10 +288,16 @@ socket.on("update_players", (data) => {
     Object.keys(data["enemies"]).forEach(id => {
         if (game.enemies[id]) {
             game.enemies[id].updatePosition(data["enemies"][id][0], data["enemies"][id][1]);
+            game.enemies[id].hp = data["enemyHealth"][id]
+            game.enemies[id].updateHealthbar();
         } else {
             game.enemies[id] = new Player(data["enemies"][id][0], data["enemies"][id][1]);
+            game.enemies[id].hp = data["enemyHealth"][id];
+            console.log("changing new enemy health")
+            game.enemies[id].updateHealthbar();
         }
         newPlayers[id] = game.enemies[id];
+        
     });
 
     // // Replace the old enemies dictionary with the new one
@@ -291,14 +311,14 @@ socket.on("update_players", (data) => {
 function joinGame() {
     game.enemies = {};
     socket.connect();
-    app.stage.addChild(game.map, game.player.sprite);
+    app.stage.addChild(game.map, game.player.container);
 }
 
 function leaveGame() {
     socket.disconnect();
     //while(app.stage.children[0]) { app.stage.removeChild(app.stage.children[0]); }
     game.clearEnemies();
-    app.stage.removeChild(game.map, game.player.sprite);
+    app.stage.removeChild(game.map, game.player.container);
     game.enemies = {};
 }
 const leaveButton = PIXI.Sprite.from('/assets/leaveButton.png');

@@ -9,6 +9,9 @@ from backend.constants import X_MAX, Y_MAX
 def random_position(n):
     return random.randint(0, n) # TODO: magic number
 
+def get_random_position():
+    return Pos(random_position(X_MAX), random_position(Y_MAX))
+
 
 class Pos:
     def __init__(self, x, y):
@@ -54,7 +57,7 @@ class Player:
         self.last_respawned_at = now
         self.kills = 0
         self.hp = 100
-        # TODO: respawn player at random position
+        self.pos = get_random_position()
         return delta
     
     def is_hit_by(self, origin, angle) -> bool:
