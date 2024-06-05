@@ -277,10 +277,11 @@ async function main() {
 
     [joinButton.x, joinButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 150];
     [leaveButton.x, leaveButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 250];
+    console.log("starting loop")
     game.loop();
 }
 
-
+console.log("Starting main")
 main();
 
 
