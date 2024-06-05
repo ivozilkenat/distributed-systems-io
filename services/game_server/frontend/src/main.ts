@@ -9,7 +9,7 @@ async function main() {
 
     const serverUrl = getServerUrl();
     const socket = io(serverUrl);
-    const GAME_SIZE = [2500, 1000];
+    const GAME_SIZE = [800, 800];
     const app = new PIXI.Application();
     await app.init({ background: '#1099bb', resizeTo: window });
 
@@ -21,7 +21,7 @@ async function main() {
     await PIXI.Assets.load('/dist/joinButton.png');
 
     const UPDATE_INTERVAL_MS: number = 50;
-    const MAXHP: number = 100;
+    const MAXHP: number = 100; //TODO make this dynamic
 
     class Game {
         map: PIXI.Sprite;
@@ -38,8 +38,11 @@ async function main() {
             const map: PIXI.Sprite = PIXI.Sprite.from('/dist/map.png');
             app.stage.addChild(map);
             map.interactive = true;
-            map.on('click', (evt) => {
-                socket.emit('player_click', Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2));
+            map.on('click', (evt: any) => {
+                if(this.player.canShoot) {
+                    let angle = Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2);
+                    socket.emit("player_click", angle);
+                }
             });
             return map;
         }
@@ -76,6 +79,15 @@ async function main() {
         }
     }
 
+    let barContext = new PIXI.GraphicsContext()
+    .poly([
+        12, 10, 
+        12 + (100), 10,
+        8 + (100), 20, 
+        8, 20
+    ])
+    .fill('white')
+
     class Player {
         x: number;
         y: number;
@@ -83,8 +95,9 @@ async function main() {
         targetY: number;
         lastUpdateTime: number;
         hp: number;
-        sprite: PIXI.Sprite;
+        container: PIXI.Container;
         healthBar: PIXI.Container;
+        canShoot: boolean = false;
 
         constructor(x: number, y: number) {
             this.x = x;
@@ -93,48 +106,48 @@ async function main() {
             this.targetY = y;
             this.lastUpdateTime = Date.now();
             this.hp = MAXHP;
-            this.sprite = this.initSprite();
+            this.container = this.initContainer();
             this.healthBar = this.initHealthbar();
+            this.updateHealthbar();
         }
 
         initHealthbar(): PIXI.Container {
-            const hpBar: PIXI.Container = new PIXI.Container();
-            hpBar.addChild(this.createBar(1, 0x000001));
-            hpBar.addChild(this.createBar(1, 0xFF0000));
+            let hpBar: PIXI.Container = new PIXI.Container();
+            hpBar.addChild(new PIXI.Graphics(barContext));
+            hpBar.addChild(new PIXI.Graphics());
             hpBar.pivot.set(0.5, 0.5);
-            app.stage.addChild(hpBar);
+            this.container.addChild(hpBar);
+            hpBar.x = -62;
+            hpBar.y = 20;
             return hpBar;
         }
 
         updateHealthbar(): void {
-            this.healthBar.x = this.sprite.x - 62;
-            this.healthBar.y = this.sprite.y + 20;
-            this.redrawBar(this.healthBar.getChildAt(1) as PIXI.Graphics, this.hp / MAXHP, 0xFF0000);
+            this.redrawBar(this.healthBar.getChildAt(1), this.hp / MAXHP, "red");
         }
 
-        redrawBar(bar: PIXI.Graphics, fill: number, color: number): void {
+        redrawBar(bar: PIXI.Graphics, fill: number, color: string) {
             bar.clear();
-            bar.beginFill(color);
             bar.drawPolygon([
-                12, 10,
+                12, 10, 
                 12 + (100 * fill), 10,
-                8 + (100 * fill), 20,
+                8 + (100 * fill), 20, 
                 8, 20
             ]);
-            bar.endFill();
+            bar.fill(color);
         }
 
-        createBar(fill: number, color: number): PIXI.Graphics {
-            const bar: PIXI.Graphics = new PIXI.Graphics();
-            this.redrawBar(bar, fill, color);
-            return bar;
+        initContainer(): PIXI.Container{
+            let container: PIXI.Container = new PIXI.Container();
+            container.addChild(this.initSprite());
+            app.stage.addChild(container);
+            return container;
         }
 
         initSprite(): PIXI.Sprite {
             const sprite: PIXI.Sprite = PIXI.Sprite.from('/dist/platypus.png');
             sprite.anchor.set(0.5, 0.5);
-            sprite.scale.set(0.1, 0.1);
-            app.stage.addChild(sprite);
+            sprite.scale.set(0.1, 0.1); //TODO remove magic numbers
             return sprite;
         }
 
@@ -155,7 +168,7 @@ async function main() {
         }
 
         drawImage(translation: (x: number, y: number) => [number, number]): void {
-            [this.sprite.x, this.sprite.y] = translation(this.x, this.y);
+            [this.container.x, this.container.y] = translation(this.x, this.y);
         }
 
         updateDraw(translation: (x: number, y: number) => [number, number] = this.canvasCenterTranslation): void {
@@ -172,11 +185,11 @@ async function main() {
         }
 
         removeFromCanvas(): void {
-            app.stage.removeChild(this.sprite);
+            app.stage.removeChild(this.container);
         }
 
         readdToCanvas(): void {
-            app.stage.addChild(this.sprite);
+            app.stage.addChild(this.container);
         }
     }
 
@@ -211,9 +224,11 @@ async function main() {
 
     const game = new Game();
 
-    socket.on('update_players', (data: { newpos: [number, number]; newHP: number; enemies: Record<string, [number, number]> }) => {
+    socket.on('update_players', (data: { newpos: [number, number]; newHP: number; enemies: Record<string, [number, number]>, enemyHealth: Record<string, number> , canShoot: boolean}) => {
         game.player.updatePosition(data.newpos[0], data.newpos[1]);
         game.player.hp = data.newHP;
+        game.player.updateHealthbar();
+        game.player.canShoot = data.canShoot;
 
         const newPlayers: Record<string, Player> = {};
 
@@ -222,8 +237,14 @@ async function main() {
         Object.keys(data.enemies).forEach(id => {
             if (game.enemies[id]) {
                 game.enemies[id].updatePosition(data.enemies[id][0], data.enemies[id][1]);
+                if (game.enemies[id].hp != data.enemyHealth[id]) {
+                    game.enemies[id].hp = data.enemyHealth[id];
+                    game.enemies[id].updateHealthbar();
+                }
             } else {
                 game.enemies[id] = new Player(data.enemies[id][0], data.enemies[id][1]);
+                game.enemies[id].hp = data.enemyHealth[id];
+                game.enemies[id].updateHealthbar();
             }
             newPlayers[id] = game.enemies[id];
         });
@@ -234,26 +255,28 @@ async function main() {
     function joinGame(): void {
         game.enemies = {};
         socket.connect();
-        app.stage.addChild(game.map, game.player.sprite);
+        app.stage.addChild(game.map, game.player.container);
     }
 
     function leaveGame(): void {
         socket.disconnect();
         game.clearEnemies();
-        app.stage.removeChild(game.map, game.player.sprite);
+        app.stage.removeChild(game.map, game.player.container);
         game.enemies = {};
     }
 
     const leaveButton: PIXI.Sprite = PIXI.Sprite.from('/dist/leaveButton.png');
     const joinButton: PIXI.Sprite = PIXI.Sprite.from('/dist/joinButton.png');
 
-    leaveButton.on('click', leaveGame);
-    leaveButton.eventMode = 'static';
-    joinButton.on('click', joinGame);
-    joinButton.eventMode = 'static';
+    leaveButton.on("click",leaveGame);
+    leaveButton.eventMode = "static";
+    leaveButton.anchor.set(0.5,0.5);
+    joinButton.on("click",joinGame);
+    joinButton.eventMode = "static";
+    joinButton.anchor.set(0.5,0.5);
 
-    [leaveButton.x, leaveButton.y] = [0, 400];
-    [joinButton.x, joinButton.y]
+    [joinButton.x, joinButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 150];
+    [leaveButton.x, leaveButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 250];
     game.loop();
 }
 
