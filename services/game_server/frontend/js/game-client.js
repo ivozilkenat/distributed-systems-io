@@ -44,7 +44,8 @@ export class Game {
         map.interactive = true;
         map.on('click', (evt) => {
             if(this.player.canShoot) {
-                socket.emit("player_click", Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2));
+                let angle = Math.atan2(evt.data.global.y - GAME_SIZE[1] / 2, evt.data.global.x - GAME_SIZE[0] / 2);
+                socket.emit("player_click", angle);
             }
         });
         return map

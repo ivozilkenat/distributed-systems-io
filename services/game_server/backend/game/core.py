@@ -30,6 +30,13 @@ class Pos:
     
     def y_distance_to(self, other):
         return abs(self.y - other.y)
+    
+    def distance_to_line(self, origin, angle):
+        # Calculate the slope of the line
+        m = math.tan(angle)
+        # Calculate the distance using the formula
+        distance = abs(-m * self.x + self.y + -origin.y + m * origin.x) / math.sqrt(m ** 2 + 1)
+        return distance
 
 
 class Player:
@@ -61,7 +68,7 @@ class Player:
         return delta
     
     def is_hit_by(self, origin, angle) -> bool:
-        return abs(math.cos(angle) * (origin.y_distance_to(self.pos))) - math.sin(angle) * (origin.x_distance_to(self.pos)) <= self.hitbox_radius
+        return (self.pos.distance_to_line(origin, angle) <= self.hitbox_radius) and abs(math.atan2(self.pos.y - origin.y, self.pos.x - origin.x) - angle) <= math.pi / 2
  
     def take_damage(self, damage, source):
         self.hp -= damage
@@ -91,7 +98,7 @@ class Player:
                 if hit_enemy is None or self.pos.distance_to(enemy.pos) < self.pos.distance_to(hit_enemy.pos):
                     hit_enemy = enemy
         damage = weapon["damage"]
-        if hit_enemy != None:
+        if hit_enemy:
             print(f"{self.name} touched {hit_enemy.name} in their no-no square.")
             hit_enemy.take_damage(damage, self)
     
