@@ -1,6 +1,6 @@
 {
     "Pistol": {
-        "damage": 50,
+        "damage": 25,
         "cooldown": 1,
         "range": 5000
     },
