@@ -12,7 +12,7 @@ def setup_route_handler(server: Server):
  
     @server.app.get("/")
     async def root():
-        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "html", "index.html"))
+        return FileResponse(os.path.join(FRONTEND_ROOT_DIR, "index.html"))
     
     @server.app.get("/modules/socket.io.js")
     async def socketio_src():

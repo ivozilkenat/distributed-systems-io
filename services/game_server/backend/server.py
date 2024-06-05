@@ -29,10 +29,7 @@ class Server:
         )
         
         # Static Files
-        self.app.mount("/html", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "html")), name="html")
-        self.app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "css")), name="css")
-        self.app.mount("/js", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "js")), name="js")
-        self.app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR, "assets")), name="assets")
+        self.app.mount("/dist", StaticFiles(directory=os.path.join(FRONTEND_ROOT_DIR)), name="html")
         # templates = Jinja2Templates(directory=os.path.join(FRONTEND_ROOT_DIR, "templates"))
         
     # Run the server
