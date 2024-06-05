@@ -8,7 +8,7 @@ const socket = io.connect(serverUrl);
 
 // TODO: put app in Game constructor?
 const app = new PIXI.Application();
-const GAME_SIZE = [2500,1000]
+const GAME_SIZE = [800,800]
 await app.init({ width: GAME_SIZE[0], height: GAME_SIZE[1] });
 
 document.getElementById("game").appendChild(app.canvas);
@@ -327,11 +327,13 @@ const joinButton = PIXI.Sprite.from('/assets/joinButton.png');
 
 leaveButton.on("click",leaveGame);
 leaveButton.eventMode = "static";
+leaveButton.anchor.set(0.5,0.5);
 joinButton.on("click",joinGame);
 joinButton.eventMode = "static";
+joinButton.anchor.set(0.5,0.5);
 
-[leaveButton.x, leaveButton.y] = [0,400];
-[joinButton.x, joinButton.y] = [200,400];
+[joinButton.x, joinButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 150];
+[leaveButton.x, leaveButton.y] = [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 250];
 
 app.stage.addChild(leaveButton);
 app.stage.addChild(joinButton);
