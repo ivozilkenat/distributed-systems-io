@@ -134,7 +134,7 @@ async function main() {
 
         redrawBar(bar: PIXI.Graphics, fill: number, color: string) {
             bar.clear();
-            bar.drawPolygon([
+            bar.poly([
                 12, 10, 
                 12 + (100 * fill), 10,
                 8 + (100 * fill), 20, 

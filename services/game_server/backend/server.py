@@ -4,7 +4,7 @@ import asyncio
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi_socketio import SocketManager
+from fastapi_socketio import SocketManager # type: ignore
 from fastapi.middleware.cors import CORSMiddleware
 from backend.constants import FRONTEND_ROOT_DIR
 from backend.game import Game
