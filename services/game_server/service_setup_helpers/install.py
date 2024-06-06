@@ -7,7 +7,8 @@ def install_frontend_dependencies():
     os.chdir(os.path.join(os.getcwd(), FRONTEND_DIR))
 
     print("Installing frontend dependencies using npm...")
-    run_command('npm install')
+    run_command('bun install')
+    run_command('bun run build')
     
     os.chdir("..")
 

@@ -1,6 +1,9 @@
 #####################
 # Python
 #####################
+# thomas' personal launch script
+serverstart.sh
+
 # testing
 output.json
 outputlines.json

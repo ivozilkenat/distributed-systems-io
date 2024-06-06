@@ -27,7 +27,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.game.rule=Host(`${DOMAIN}`) && PathPrefix(`/lobby`)"
       - "traefik.http.routers.game.entrypoints=web"
-      - "traefik.http.services.game.loadbalancer.server.port=8001"
+      - "traefik.http.services.game.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.game-stripprefix.stripprefix.prefixes=/lobby"
+      - "traefik.http.routers.game.middlewares=game-stripprefix"
 
   db:
     image: ${DATABASE_IMAGE}
