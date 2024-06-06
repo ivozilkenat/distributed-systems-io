@@ -3,8 +3,14 @@ import * as PIXI from 'pixi.js';
 
 async function main() {
     function getServerUrl(): string {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('serverUrl') || window.location.host.split(":")[0] + ':3001';
+        //super hacky but may be a TEMPORARY fix
+        let domain: string = window.location.host.split(":")[0];
+        if (domain == 'localhost'){
+            return domain + ':3001'
+        }
+        else {
+            return domain + ':80'
+        }
     }
 
     const serverUrl = getServerUrl();
