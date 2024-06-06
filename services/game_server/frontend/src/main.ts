@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js';
 async function main() {
     function getServerUrl(): string {
         const params = new URLSearchParams(window.location.search);
-        return params.get('serverUrl') || 'http://0.0.0.0:3001';
+        return params.get('serverUrl') || window.location.host.split(":")[0] + ':3001';
     }
 
     const serverUrl = getServerUrl();
