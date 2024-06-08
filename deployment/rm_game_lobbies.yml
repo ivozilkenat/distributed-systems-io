@@ -1,0 +1,8 @@
+---
+- name: Remove Docker stack using Ansible
+  hosts: localhost
+  vars:
+    stack_name: "game_lobbies"
+  tasks:
+    - name: Remove Docker stack
+      command: docker stack rm {{ stack_name }}

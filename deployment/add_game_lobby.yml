@@ -1,0 +1,45 @@
+---
+- name: Add Game Lobby
+  hosts: localhost
+  vars:
+    env_file: ".env"
+    lobby_uuid: ""
+    compose_file: "./game_services/docker-compose_{{ lobby_uuid }}.yml"
+
+  tasks:
+#    - name: Load environment variables from .env file
+#      set_fact:
+#        env_vars: "{{ lookup('community.general.ini_file', env_file) }}"
+
+    - name: Set environment variables
+      set_fact:
+#        matchmaking_domain: "{{ env_vars.DOMAIN }}"
+#        game_image_path: "{{ env_vars.GAME_IMAGE }}"
+#        stack_name: "{{ env_vars.STACK_NAME }}"
+#        compose_template: "{{ env_vars.COMPOSE_TEMPLATE }}"
+        matchmaking_domain: "distr-sys-io.ivo-zilkenat.de"
+        game_image_path: "ghcr.io/ivozilkenat/distributed-systems-io-game:latest"
+        stack_name: "game_lobbies"
+        compose_template: "./game_services/docker-compose.yml.j2"
+
+    - name: Validate UUID
+      fail:
+        msg: "UUID must be provided."
+      when: lobby_uuid == ""
+
+    - name: Generate Docker Compose file from template
+      template:
+        src: "{{ compose_template }}"
+        dest: "{{ compose_file }}"
+      vars:
+        uuid: "{{ lobby_uuid }}"
+        domain: "{{ matchmaking_domain }}"
+        game_image: "{{ game_image_path }}"
+
+    - name: Deploy game lobby service
+      command: docker stack deploy -c "{{ compose_file }}" "{{ stack_name }}"
+
+    - name: Clean up generated Docker Compose file
+      file:
+        path: "{{ compose_file }}"
+        state: absent

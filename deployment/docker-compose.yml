@@ -1,0 +1,9 @@
+# THIS COMPOSE EXISTS TO PULL LATEST IMAGES
+
+services:
+  matchmaking:
+    image: ${MATCHMAKING_IMAGE}
+  game:
+    image: ${GAME_IMAGE}
+  db:
+    image: ${DATABASE_IMAGE}

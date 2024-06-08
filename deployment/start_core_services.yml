@@ -1,0 +1,24 @@
+---
+- name: Deploy Docker stack using Ansible
+  hosts: localhost
+  vars:
+    stack_name: "core_services"
+  tasks:
+    - name: Ensure .env file exists
+      stat:
+        path: .env
+      register: env_file
+
+    - name: Fail if .env file is not present
+      fail:
+        msg: ".env file not found"
+      when: not env_file.stat.exists
+
+    - name: Deploy Docker stack with environment variables
+      shell: |
+        set -a
+        source .env
+        set +a
+        docker stack deploy -c ./core_services/docker-compose.yml {{ stack_name }}
+      args:
+        executable: /bin/bash
