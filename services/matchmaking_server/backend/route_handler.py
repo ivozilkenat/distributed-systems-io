@@ -22,7 +22,7 @@ def setup_route_handler(server: Server, database: Database):
             {"ip": "TEST"},
             {"ip": "TEST2"},
             {"ip": "TEST3"},
-            {"ip": "192.168.1.4"},
+            {"ip": "TEST4"},
             {"ip": "192.168.1.5"},
         ]
         html = ''.join([f'''
