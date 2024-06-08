@@ -19,7 +19,7 @@ def setup_route_handler(server: Server, database: Database):
     @server.app.get('/servers')
     def get_servers():
         servers = [
-            {"ip": "0.0.0.0:3001"},
+            {"ip": "TEST"},
             {"ip": "192.168.1.2"},
             {"ip": "192.168.1.3"},
             {"ip": "192.168.1.4"},
