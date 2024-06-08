@@ -20,7 +20,7 @@ def setup_route_handler(server: Server, database: Database):
     def get_servers():
         servers = [
             {"ip": "TEST"},
-            {"ip": "192.168.1.2"},
+            {"ip": "TEST2"},
             {"ip": "192.168.1.3"},
             {"ip": "192.168.1.4"},
             {"ip": "192.168.1.5"},
