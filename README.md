@@ -14,12 +14,16 @@
 ##### Dependencies
 1. `docker`
 2. `ansible`
-3. `git, make` (pre-installed on many Linux distros)
+3. `python3-dotenv-cli`
+4. `git` (pre-installed on many Linux distros)
+5. `make` (pre-installed on many Linux distros)
 
 ##### Setup
 
-1. Clone project & `cd` into `deployment` directory
-2. Join docker swarm cluster
+1. Clone project 
+2. Configure environment variables `cp local.env ./deployment/.env` (e.g. `DOMAIN`, ...)
+3. `cd` into `./deployment` directory
+4. Join docker swarm cluster
    1. If not cluster present, create one and use current machine as master node: `docker swarm init --advertise-addr MAIN_INTERFACE_IP´
 `
 
