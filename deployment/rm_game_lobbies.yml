@@ -2,7 +2,7 @@
 - name: Remove Docker stack using Ansible
   hosts: localhost
   vars:
-    stack_name: "game_lobbies"
+    stack_name: "{{ lookup('env', 'STACK_NAME_GAME_LOBBIES') }}"
   tasks:
     - name: Remove Docker stack
       command: docker stack rm {{ stack_name }}

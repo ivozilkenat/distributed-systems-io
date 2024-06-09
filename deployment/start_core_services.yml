@@ -2,7 +2,7 @@
 - name: Deploy Docker stack using Ansible
   hosts: localhost
   vars:
-    stack_name: "core_services"
+    stack_name: "{{ lookup('env', 'STACK_NAME_CORE_SERVICES') }}"
   tasks:
     - name: Ensure .env file exists
       stat:

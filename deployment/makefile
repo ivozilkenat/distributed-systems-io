@@ -1,6 +1,7 @@
 # Makefile to run Ansible playbooks
 
 .PHONY: deploy add_lobby
+include .env
 
 # Define the playbook files
 DEPLOY_PLAYBOOK := start_core_services.yml
@@ -20,16 +21,16 @@ rm-all: rm-lobbies rm-core-services
 # ==================
 
 start-core-services:
-	ansible-playbook $(DEPLOY_PLAYBOOK)
+	@dotenv ansible-playbook $(DEPLOY_PLAYBOOK)
 
 rm-core-services:
-	ansible-playbook $(RM_PLAYBOOK)
+	@dotenv ansible-playbook $(RM_PLAYBOOK)
 
 add-lobby:
-	ansible-playbook $(ADD_LOBBY_PLAYBOOK) -e "lobby_id=$(lobby_id)"
+	@dotenv ansible-playbook $(ADD_LOBBY_PLAYBOOK) -e "lobby_id=$(lobby_id)"
 
 rm-lobbies:
-	ansible-playbook $(RM_GAME_LOBBIES_PLAYBOOK)
+	@dotenv ansible-playbook $(RM_GAME_LOBBIES_PLAYBOOK)
 
 pull-images:
-	docker compose pull
+	@docker compose pull
