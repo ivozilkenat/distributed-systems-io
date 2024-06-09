@@ -1,18 +1,16 @@
-version: '3.7'
-
 services:
-  game_lobby_{{ uuid }}:
+  game_lobby_{{ id }}:
     image: {{ game_image }}
     environment:
-      - lobby_id={{ uuid }}
+      - LOBBY_ID={{ id }}
     networks:
       - core_services_backend
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.game_lobby_{{ uuid }}.rule=Host(`{{ uuid }}.{{ domain }}`)"
-        - "traefik.http.routers.game_lobby_{{ uuid }}.entrypoints=web"
-        - "traefik.http.services.game_lobby_{{ uuid }}.loadbalancer.server.port=3001"
+        - "traefik.http.routers.game_lobby_{{ id }}.rule=Host(`{{ id }}.{{ domain }}`)"
+        - "traefik.http.routers.game_lobby_{{ id }}.entrypoints=web"
+        - "traefik.http.services.game_lobby_{{ id }}.loadbalancer.server.port=3001"
 
 networks:
   core_services_backend:
