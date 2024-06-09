@@ -8,8 +8,8 @@ RM_PLAYBOOK := rm_core_services.yml
 ADD_LOBBY_PLAYBOOK := add_game_lobby.yml
 RM_GAME_LOBBIES_PLAYBOOK := rm_game_lobbies.yml
 
-# Default value for lobby_uuid
-LOBBY_UUID := test
+# Default value for lobby_id
+lobby_id := test
 
 # === DEPLOYMENT ===
 deploy: rm-all pull-images start-all
@@ -26,7 +26,7 @@ rm-core-services:
 	ansible-playbook $(RM_PLAYBOOK)
 
 add-lobby:
-	ansible-playbook $(ADD_LOBBY_PLAYBOOK) -e "lobby_uuid=$(LOBBY_UUID)"
+	ansible-playbook $(ADD_LOBBY_PLAYBOOK) -e "lobby_id=$(lobby_id)"
 
 rm-lobbies:
 	ansible-playbook $(RM_GAME_LOBBIES_PLAYBOOK)

@@ -3,8 +3,8 @@
   hosts: localhost
   vars:
     env_file: ".env"
-    lobby_uuid: ""
-    compose_file: "./game_services/docker-compose_{{ lobby_uuid }}.yml"
+    lobby_id: ""
+    compose_file: "./game_services/docker-compose_{{ lobby_id }}.yml"
 
   tasks:
 #    - name: Load environment variables from .env file
@@ -25,14 +25,14 @@
     - name: Validate UUID
       fail:
         msg: "UUID must be provided."
-      when: lobby_uuid == ""
+      when: lobby_id == ""
 
     - name: Generate Docker Compose file from template
       template:
         src: "{{ compose_template }}"
         dest: "{{ compose_file }}"
       vars:
-        uuid: "{{ lobby_uuid }}"
+        uuid: "{{ lobby_id }}"
         domain: "{{ matchmaking_domain }}"
         game_image: "{{ game_image_path }}"
 

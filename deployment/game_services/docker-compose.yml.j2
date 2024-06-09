@@ -4,7 +4,7 @@ services:
   game_lobby_{{ uuid }}:
     image: {{ game_image }}
     environment:
-      - LOBBY_UUID={{ uuid }}
+      - lobby_id={{ uuid }}
     networks:
       - core_services_backend
     deploy:
