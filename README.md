@@ -56,10 +56,5 @@ All services can either be started by utilizing their respective containers or b
    1. Activate `venv`
    2. `python ./server/main.py`
 
-##### Run Database [DEPRECATED]
-Use docker to run your database:
-
-```bash
-docker run --env-file database.env -v ./initial-database.sql:/docker-entrypoint-initdb.d/01-initialize.sql -p 3306:3306 mariadb:latest
-```
-or use your own instance (e.g. xampp for windows) and import the `initial-database.sql` into a new database called `dsio`. You should also create a user called `dsio` with password `dsio` and grant it all privileges on `dsio`.
+##### Creating the database
+Run `docker compose up` in services/database to create the database and a phpmyadmin instance at 8080.

@@ -1,0 +1,18 @@
+# Development compose for mariadb
+services:
+  db:
+    image: mariadb:latest
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    env_file:
+      - dev.env
+    volumes:
+      - ./initial-database.sql:/docker-entrypoint-initdb.d/01-initialize.sql
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    env_file:
+      - dev.env
+    ports:
+      - 8080:80
