@@ -5,4 +5,4 @@
     stack_name: "{{ lookup('env', 'STACK_NAME_CORE_SERVICES') }}"
   tasks:
     - name: Remove Docker stack
-      command: docker stack rm {{ stack_name }}
+      command: docker stack rm --detach=false {{ stack_name }}

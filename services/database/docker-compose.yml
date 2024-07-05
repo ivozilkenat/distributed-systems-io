@@ -15,4 +15,4 @@ services:
     env_file:
       - dev.env
     ports:
-      - 8080:80
+      - 8081:80 # Using 8081 to avoid clashing with traefik
