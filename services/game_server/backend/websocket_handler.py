@@ -1,6 +1,4 @@
 from backend.server import Server
-from backend.highscores_api import HighscoresAPI
-from backend.game import Game
 from backend.game.core import Pos, Player, random_position
 from backend.game.core import X_MAX, Y_MAX
 
@@ -9,7 +7,7 @@ from backend.game.core import X_MAX, Y_MAX
 # TODO: Please use more descriptive variable names
 # TODO: How do we do maths? @ivo has math lib if needed (for basic vector operations)
 
-def setup_ws_handler(server: Server, highscores_api: HighscoresAPI):
+def setup_ws_handler(server: Server):
 
     @server.app.sio.on("player_move")
     async def player_move(sid, update):
@@ -33,12 +31,14 @@ def setup_ws_handler(server: Server, highscores_api: HighscoresAPI):
     @server.app.sio.on('connect')
     async def client_side_receive_msg(sid, env):
         server.game.socket_connections[sid] = Player(server.game, Pos(random_position(X_MAX), random_position(Y_MAX)))
+        server.matchmaking_api.ping()
         await server.game.update_players()
 
 
     @server.app.sio.on('disconnect')
     async def client_side_receive_msg(sid):
         del server.game.socket_connections[sid]
+        server.matchmaking_api.ping()
         await server.game.update_players()
 
     # TODO call this when the player gets killed
@@ -48,4 +48,4 @@ def setup_ws_handler(server: Server, highscores_api: HighscoresAPI):
         survival_time = player.respawn_and_get_survival_time()
         seconds_alive = survival_time.total_seconds()
 
-        highscores_api.addHighscore(name, kills, seconds_alive)
+        server.matchmaking_api.addHighscore(name, kills, seconds_alive)
