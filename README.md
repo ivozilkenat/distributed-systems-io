@@ -29,8 +29,9 @@
 
 ##### Actions
 
-*Deploy using local container (e.g. your code changes in game_server or matchmaking_server)*
-* Run `make deploy-local`
+*Deploy using local container (e.g. your code changes in game_server or matchmaking_server):*
+* Please use the images and domain environmental variables as listed in localhost.env in your deployment/.env file
+* Then run `make deploy-local`
 
 *Deploy*
 * Run `make deploy`
