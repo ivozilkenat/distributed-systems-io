@@ -55,4 +55,6 @@ provide-game-image:
 	docker push "127.0.0.1:5000/game"
 
 purge-data:
+	@echo "Waiting 5s for stack to be deleted so we can remove the volume"
+	@sleep 5s
 	-docker volume rm core_services_database
