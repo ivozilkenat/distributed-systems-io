@@ -8,7 +8,8 @@
   tasks:
     - name: Set environment variables as facts
       set_fact:
-        matchmaking_domain: "{{ lookup('env', 'DOMAIN') }}"
+        matchmaking_server: "{{ lookup('env', 'APP_MATCHMAKING_SERVER') }}"
+        domain: "{{ lookup('env', 'DOMAIN') }}"
         game_image_path: "{{ lookup('env', 'GAME_IMAGE') }}"
         stack_name: "{{ lookup('env', 'STACK_NAME_GAME_LOBBIES') }}"
         compose_template: "{{ lookup('env', 'COMPOSE_TMP_GAME') }}"
@@ -32,11 +33,12 @@
         dest: "{{ compose_file }}"
       vars:
         id: "{{ lobby_id }}"
-        domain: "{{ matchmaking_domain }}"
+        matchmaking_server: "{{ matchmaking_server }}"
+        domain: "{{ domain }}"
         game_image: "{{ game_image_path }}"
 
     - name: Deploy game lobby service
-      command: docker stack deploy -c "{{ compose_file }}" "{{ stack_name }}"
+      command: docker stack deploy --detach=false -c "{{ compose_file }}" "{{ stack_name }}"
 
     - name: Clean up generated Docker Compose file
       file:

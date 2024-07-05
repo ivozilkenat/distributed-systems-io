@@ -21,6 +21,9 @@ class Game:
             asyncio.create_task(self.broadcast_game_state())
         ]
 
+    def get_player_count(self):
+        return len(self.socket_connections)
+
     async def update_game_state(self) -> None:
         while True:
             # Logic to update the game state

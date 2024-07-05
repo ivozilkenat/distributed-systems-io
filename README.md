@@ -24,42 +24,42 @@
 2. Configure environment variables `cp local.env ./deployment/.env` (e.g. `DOMAIN`, ...)
 3. `cd` into `./deployment` directory
 4. Join docker swarm cluster
-   1. If not cluster present, create one and use current machine as master node: `docker swarm init --advertise-addr MAIN_INTERFACE_IP´
+   1. If not cluster present, create one and use current machine as master node: `docker swarm init --advertise-addr 127.0.0.1´
 `
 
 ##### Actions
+
+*Deploy using local container (e.g. your code changes in game_server or matchmaking_server)*
+* Run `make deploy-local`
 
 *Deploy*
 * Run `make deploy`
 
 *Undeployment*
-* Run `make rm-deploy`
+* Run `make rm-all`
 
 *Scaling*
-* Add lobby `make add-lobby LOBBY_ID=test`
+* Add lobby `make lobby_id=your_name_here add-lobby`
 
-### Minimal testable Setup - *Manual* [!!!REWORK THIS!!!]
+### Minimal testable setup
 
-All services can either be started by utilizing their respective containers or by manually running the services on the host machine directly. 
-> **Note**: Make sure that there is no port overlapping and consider that when testing services together that they must discover each other. In docker this is simply handled by container name DNS.
+*Run database:*
++ Go into services/database
++ Run `docker compose up`
 
-##### Running services individually - *without docker*
-1. Change into the respective sub-directory
+Run the matchmaking server:
++ Go into services/matchmaking_server
++ Activate venv (e.g. with `source backend/venv/bin/activate`)
++ Run server with `python main.py`
 
-###### Project Setup
-1. `python ./install.py`
-
-###### Run
-1. Automatically
-   1. `python ./start.py`
-2. Manually (faster startup)
-   1. Activate `venv`
-   2. `python ./server/main.py`
-
-##### Run Database [DEPRECATED]
-Use docker to run your database:
-
-```bash
-docker run --env-file database.env -v ./initial-database.sql:/docker-entrypoint-initdb.d/01-initialize.sql -p 3306:3306 mariadb:latest
-```
-or use your own instance (e.g. xampp for windows) and import the `initial-database.sql` into a new database called `dsio`. You should also create a user called `dsio` with password `dsio` and grant it all privileges on `dsio`.
+*Run _a_ game server:*
++ Go into services/game_server
++ Activate venv (e.g. with `source backend/venv/bin/activate`)
++ Optional: Customize environment variables (with `export {VARIABLE_NAME}={VARIABLE_VALUE}`)
+  + `HOST`: Host name of the Server, defaults to 0.0.0.0, but could (should) be `localhost` for example
+  + `PORT`: Port of the Server, defaults to 3001
+  + `SERVER_NAME`: Name of the lobby which gets sent to the matchmaking_server, defaults to `Unbekannt`
+  + `SERVER_URL`: The url of the lobby which gets sent to the matchmaking_server, defaults to `http://{HOST}:{PORT}`
+  + Credentials `SERVER_ID` and `SERVER_TOKEN`, not set by default
+    Only use these, if you want to re log into the matchmaking_server, you probably do not need them.
++ Run server with `python main.py`

@@ -2,9 +2,17 @@ services:
   game_lobby_{{ id }}:
     image: {{ game_image }}
     environment:
-      - LOBBY_ID={{ id }}
+      MATCHMAKING_SERVER: "{{ matchmaking_server }}"
+      SERVER_NAME: "{{ id }}"
+      SERVER_URL: "http://{{ id }}.{{ domain }}"
+      # Optional, if you want to reappear as an existing server
+      # - SERVER_ID: 1
+      # - SERVER_TOKEN: <uuid-token-here>
     networks:
       - core_services_backend
+    stop_signal: SIGINT
+    depends_on:
+      - matchmaking
     deploy:
       labels:
         - "traefik.enable=true"

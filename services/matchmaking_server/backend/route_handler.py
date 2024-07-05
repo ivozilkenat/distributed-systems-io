@@ -5,9 +5,9 @@ from fastapi import HTTPException
 from backend.server import Server
 from backend.database import Database
 from backend.constants import FRONTEND_ROOT_DIR
-from backend.models import Highscore
+from backend.models import Highscore, GameServerDescription, GameServerUpdate, GameServerCredentials, GameServerPing
 
-# Default Route Setups 
+# Default Route Setups
 # TODO: implement routers
 
 def setup_route_handler(server: Server, database: Database):
@@ -18,21 +18,22 @@ def setup_route_handler(server: Server, database: Database):
 
     @server.app.get('/servers')
     def get_servers():
-        servers = [
-            {"ip": "TEST"},
-            {"ip": "TEST2"},
-            {"ip": "TEST3"},
-            {"ip": "TEST4"},
-            {"ip": "192.168.1.5"},
-        ]
-        html = ''.join([f'''
+        servers = database.getGameServers()
+        html = ''
+        for server in servers:
+            color = "green" if server["status"] == "HEALTHY" else "yellow" if server["status"] == "UNHEALTHY" else "gray"
+            html = html + f'''
             <tr>
-                <td class="border px-4 py-2">{server['ip']}</td>
+                <td class="border px-4 py-2">{server['name']}</td>
+                <td class="border px-4 py-2">{server['url']}</td>
+                <td class="border px-4 py-2">{server['last_seen']}</td>
+                <td class="border px-4 py-2">{server['player_count']}</td>
+                <td class="border px-4 py-2">{server['status']}</td>
                 <td class="border px-4 py-2">
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="location.href='/game?serverUrl={server['ip']}'">Connect</button>
+                    <a class="bg-{color}-500 text-white px-4 py-2 rounded hover:bg-{color}-700" href="{server['url']}" target="_blank">Connect</a>
                 </td>
             </tr>
-        ''' for server in servers])
+        '''
         return HTMLResponse(content=html)
     
     @server.app.get('/highscores')
@@ -68,3 +69,58 @@ def setup_route_handler(server: Server, database: Database):
             raise HTTPException(status_code=500, detail='Could not save highscore')
         
         return True
+
+    @server.app.post('/game_servers/create', status_code=201)
+    async def create_game_server(game_server: GameServerDescription):
+        if len(game_server.name) > 63:
+            raise HTTPException(status_code=400, detail='Name should not be longer than 63 characters')
+        if len(game_server.url) > 255:
+            raise HTTPException(status_code=400, detail='URL should not be longer than 255 characters')
+
+        response = database.registerGameServer(game_server.name, game_server.url)
+        if not response:
+            raise HTTPException(status_code=500, detail='Could not refresh game server')
+
+        return JSONResponse(content=response, status_code=201)
+
+    @server.app.post('/game_servers/update', status_code=201)
+    async def update_game_server(game_server_update: GameServerUpdate):
+        if game_server_update.name and len(game_server_update.name) > 63:
+            raise HTTPException(status_code=400, detail='Name should not be longer than 63 characters')
+        if game_server_update.url and len(game_server_update.url) > 255:
+            raise HTTPException(status_code=400, detail='URL should not be longer than 255 characters')
+
+        okay = database.updateGameServer(game_server_update)
+        if not okay:
+            raise HTTPException(status_code=500, detail='Could not refresh game server')
+
+        return True
+
+    @server.app.post('/game_servers/ping', status_code=200)
+    async def refresh_game_server(game_server_ping: GameServerPing):
+        okay = database.refreshGameServer(game_server_ping)
+        if not okay:
+            raise HTTPException(status_code=500, detail='Could not refresh game server')
+
+        return True
+
+    @server.app.post('/game_servers/delete', status_code=201)
+    async def remove_game_server(game_server_credentials: GameServerCredentials):
+        okay = database.unregisterGameServer(game_server_credentials)
+        if not okay:
+            raise HTTPException(status_code=500, detail='Could not remove game server')
+
+        return True
+
+    @server.app.post('/game_servers/logoff', status_code=201)
+    async def logoff_game_server(game_server_credentials: GameServerCredentials):
+        okay = database.logOffGameServer(game_server_credentials)
+        if not okay:
+            raise HTTPException(status_code=500, detail='Could not log off game server')
+
+        return True
+
+    @server.app.get('/game_servers', status_code=200)
+    async def get_game_servers():
+        game_servers = database.getGameServers()
+        return JSONResponse(content=jsonable_encoder(game_servers))
