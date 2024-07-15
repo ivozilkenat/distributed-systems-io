@@ -91,7 +91,7 @@ export class Player {
         [this.container.x, this.container.y] = translation(this.x, this.y);
     }
 
-    updateDraw(translation: (x: number, y: number) => [number, number] = this.canvasCenterTranslation): void {
+    updateDraw(translation: (x: number, y: number) => [number, number]): void {
         this.interpolatePosition();
         this.drawImage(translation);
     }

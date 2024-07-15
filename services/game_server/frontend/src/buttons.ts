@@ -9,6 +9,10 @@ export function setupButtons(app: PIXI.Application, GAME_SIZE: [number, number],
         game.leaveGame();
     });
 
+    leaveButton.eventMode = "static";
+    leaveButton.anchor.set(0.5,0.5);
+    joinButton.eventMode = "static";
+    joinButton.anchor.set(0.5,0.5);
     app.stage.addChild(joinButton, leaveButton);
 }
 

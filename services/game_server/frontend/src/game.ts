@@ -74,7 +74,8 @@ export class Game {
             enemy.readdToCanvas();
             enemy.updateDraw(enemy.relativeToPlayerTranslation(this.player));
         });
-        this.player.updateDraw();
+        const t =  (x: number, y: number) => this.player.relativeToPlayerTranslation(this.player)(x, y);
+        this.player.updateDraw(t);
     }
 
     drawBackground(): void {
@@ -103,13 +104,13 @@ export class Game {
     }
 
     updateGameFromServer(data: {
-        updatedPosition: [number, number],
+        newpos: [number, number],
         newHP: number,
         enemies: Record<string, [number, number]>,
         enemyHealth: Record<string, number>,
         canShoot: boolean
     }): void {
-        this.player.updatePosition(data.updatedPosition[0], data.updatedPosition[1]);
+        this.player.updatePosition(data.newpos[0], data.newpos[1]);
         this.player.hp = data.newHP;
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
