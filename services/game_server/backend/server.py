@@ -49,7 +49,7 @@ class Server:
         
     async def _gather_tasks(self) -> None:
         tasks = [
-            *self.get_tasks(),
+            *self._get_tasks(),
             *self.game._get_tasks()
             *self.matchmaking_api._get_tasks(),
         ]
