@@ -115,7 +115,7 @@ export class Game {
     }
 
     updateGameFromServer(data: {
-        gameState: Record<string, any>,
+        gameState: any,
         canShoot: boolean,
         playerID: string,
     }): void {

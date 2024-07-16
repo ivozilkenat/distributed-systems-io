@@ -22,7 +22,7 @@ export function initializeSocket(): Socket {
 }
 
 export function configureSocketEvents(socket: Socket, game: Game): void {
-    socket.on('update_players', (data: { newpos: [number, number], newHP: number, enemies: Record<string, [number, number]>, enemyHealth: Record<string, number>, canShoot: boolean }): void => {
+    socket.on('update_players', (data: { gameState: any, canShoot: boolean , playerID: string}): void => {
         game.updateGameFromServer(data);
     });
 }

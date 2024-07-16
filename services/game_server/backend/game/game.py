@@ -1,12 +1,8 @@
 import asyncio
 import json
 import os
-<<<<<<< HEAD
-import time
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
-=======
->>>>>>> edcfd8376da1745ba44dc02959b4147517bd218c
 from typing import Dict
 from .core import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
