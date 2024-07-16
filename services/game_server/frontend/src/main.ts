@@ -9,7 +9,7 @@ import { loadAssets } from './assets';
 async function main(): Promise<void> {
     const GAME_SIZE: [number, number] = [800, 800];
     await loadAssets()
-    const app: PIXI.Application = await createApp(GAME_SIZE);
+    const app: PIXI.Application = await createApp();
     const keys: Record<string, boolean> = initializeKeyMapping();
     const socket: Socket = initializeSocket();
     const game: Game = new Game(app, socket, keys, GAME_SIZE);

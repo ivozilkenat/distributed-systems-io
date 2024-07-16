@@ -3,11 +3,7 @@ import { Game } from './game';
 
 function getServerUrl() {
     let domain = window.location.host.split(":")[0];
-    if (domain === 'localhost') {
-        return domain + ':3001';
-    } else {
-        return domain + ':80';
-    }
+            return domain + ':3001';
 }
 
 export function initializeSocket(): Socket {
