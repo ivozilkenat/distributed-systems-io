@@ -11,7 +11,7 @@ STATE_UPDATE_INTERVAL = 1/60
 BROADCAST_INTERVAL = 1/20
 
 # Ping Matchmaking Server every ten seconds
-HEARTBEAT_INTERVAL = 10.
+HEARTBEAT_INTERVAL = 10
 
 # ENVIRONMENT
 HOST = os.getenv("HOST", "0.0.0.0")
