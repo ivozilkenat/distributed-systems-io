@@ -48,7 +48,7 @@ class Game:
             #print("Broadcasting game state")
             await asyncio.sleep(BROADCAST_INTERVAL)
 
-    def check_collisions(players) -> None:
+    def check_collisions(self, players) -> None:
         projectiles_to_destroy = []
         for _, projectile in self.projectiles.items():
             for _, player in players:
