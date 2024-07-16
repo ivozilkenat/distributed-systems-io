@@ -22,3 +22,4 @@ SERVER_NAME = os.getenv('SERVER_NAME', os.getenv('HOSTNAME', "Unbenannt"))
 SERVER_URL = os.getenv('SERVER_URL', f'http://{HOST}:{PORT}/')
 SERVER_ID = os.getenv('SERVER_ID')
 SERVER_TOKEN = os.getenv('SERVER_TOKEN')
+DEPEND_ON_MATCHMAKING = os.getenv('DEPEND_ON_MATCHMAKING', "1") != "0"
