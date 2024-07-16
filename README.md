@@ -57,6 +57,7 @@ Run the matchmaking server:
 + Go into services/game_server
 + Activate venv (e.g. with `source venv/bin/activate`)
 + Optional: Customize environment variables (with `export {VARIABLE_NAME}={VARIABLE_VALUE}`)
+  + `DEPEND_ON_MATCHMAKING`: Set to 0 if you want the game server to start without the matchmaking server 
   + `HOST`: Host name of the Server, defaults to 0.0.0.0, but could (should) be `localhost` for example
   + `PORT`: Port of the Server, defaults to 3001
   + `SERVER_NAME`: Name of the lobby which gets sent to the matchmaking_server, defaults to `Unbekannt`
