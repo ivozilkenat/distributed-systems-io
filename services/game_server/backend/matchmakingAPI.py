@@ -3,7 +3,7 @@ import json
 import requests
 import logging
 from typing import Union
-from backend.constants import HEARTBEAT_INTERVAL, SERVER_NAME, SERVER_URL, DEPEND_ON_MATCHMAKING, CREDENTIALS_FILE
+from backend.constants import HEARTBEAT_INTERVAL, SERVER_NAME, SERVER_URL, DEPEND_ON_MATCHMAKING, CREDENTIALS_FILE, PING_RETRIES
 from backend.game import Game
 import asyncio
 import sys
@@ -121,18 +121,19 @@ class MatchmakingAPI:
             sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
 
         while self.isRegistered():
-            if not self.ping():
-                print("Ping failed [1/3]")
-                if not self.ping():
-                    print("Ping failed [2/3]")
-                    if not self.ping():
-                        print("Ping failed [3/3]; stopping now")
-                        if DEPEND_ON_MATCHMAKING:
-                            sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
+            i = 0
+            while not self.ping() and i < PING_RETRIES and DEPEND_ON_MATCHMAKING:
+                i = i + 1
+                print(f"Ping failed [{i}/{PING_RETRIES}]")
+                await asyncio.sleep(HEARTBEAT_INTERVAL)
+
+            if i == PING_RETRIES and DEPEND_ON_MATCHMAKING:
+                sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
+
             await asyncio.sleep(HEARTBEAT_INTERVAL)
 
     def updateGameServerProperties(self, name: str, url: str):
-        if not self.isRegistered():
+            if not self.isRegistered():
             return False
 
         response = self.post("/game_servers/update", {"name": name, "url": url})
