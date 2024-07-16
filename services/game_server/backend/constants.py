@@ -23,3 +23,4 @@ SERVER_URL = os.getenv('SERVER_URL', f'http://{HOST}:{PORT}/')
 SERVER_ID = os.getenv('SERVER_ID')
 SERVER_TOKEN = os.getenv('SERVER_TOKEN')
 DEPEND_ON_MATCHMAKING = os.getenv('DEPEND_ON_MATCHMAKING', "1") != "0"
+CREDENTIALS_FILE = os.getenv('CREDENTIALS_FILE', os.path.join(DATA_DIR, "credentials.json"))

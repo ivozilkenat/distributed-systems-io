@@ -64,4 +64,5 @@ Run the matchmaking server:
   + `SERVER_URL`: The url of the lobby which gets sent to the matchmaking_server, defaults to `http://{HOST}:{PORT}`
   + Credentials `SERVER_ID` and `SERVER_TOKEN`, not set by default
     Only use these, if you want to re log into the matchmaking_server, you probably do not need them.
+  + `CREDENTIALS_FILE`: The file where credentials are saved to, defaults to `DATA_DIR/credentials.json`
 + Run server with `python main.py`
