@@ -8,7 +8,7 @@
   tasks:
     - name: Set environment variables as facts
       set_fact:
-        matchmaking_server: "{{ lookup('env', 'APP_MATCHMAKING_SERVER') }}"
+        app_matchmaking_host: "{{ lookup('env', 'APP_MATCHMAKING_SERVER') }}"
         domain: "{{ lookup('env', 'DOMAIN') }}"
         game_image_path: "{{ lookup('env', 'GAME_IMAGE') }}"
         stack_name: "{{ lookup('env', 'STACK_NAME_GAME_LOBBIES') }}"
@@ -33,7 +33,7 @@
         dest: "{{ compose_file }}"
       vars:
         id: "{{ lobby_id }}"
-        matchmaking_server: "{{ matchmaking_server }}"
+        app_matchmaking_host: "{{ app_matchmaking_host }}"
         domain: "{{ domain }}"
         game_image: "{{ game_image_path }}"
 

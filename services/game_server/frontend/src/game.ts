@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { Player } from './player.ts';
+import { Entity } from './entity.ts';
 import { Socket } from 'socket.io-client';
 import { CheckBox, List } from '@pixi/ui';
 
@@ -24,6 +25,7 @@ export class Game {
     map: PIXI.Sprite;
     player: Player;
     enemies: Record<string, Player>;
+    projectiles: Record<string, Entity>;
     socket: Socket;
     app: PIXI.Application;
     keys: Record<string, boolean>;
@@ -35,6 +37,7 @@ export class Game {
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
     ) {
         this.enemies = {};
+        this.projectiles = {};
         this.socket = socket;
         this.app = app;
         this.keys = keys;
@@ -113,14 +116,15 @@ export class Game {
     }
 
     updateGameFromServer(data: {
-        newpos: [number, number],
-        newHP: number,
-        enemies: Record<string, [number, number]>,
-        enemyHealth: Record<string, number>,
-        canShoot: boolean
+        gameState: any,
+        canShoot: boolean,
+        playerID: string,
     }): void {
-        this.player.updatePosition(data.newpos[0], data.newpos[1]);
-        this.player.hp = data.newHP;
+        let playerID = data.playerID;
+        let playerData = data.gameState["players"]
+        let projectileData = data.gameState["projectiles"]
+        this.player.updatePosition(playerData[playerID]["pos"][0], playerData[playerID]["pos"][1]);
+        this.player.hp = playerData[playerID]["hp"];
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
 
@@ -128,19 +132,28 @@ export class Game {
 
         this.clearEnemies();
 
-        Object.keys(data.enemies).forEach(id => {
+        Object.keys(playerData).forEach(id => {
+            if (id === playerID) return;
             if (this.enemies[id]) {
-                this.enemies[id].updatePosition(data.enemies[id][0], data.enemies[id][1]);
-                if (this.enemies[id].hp !== data.enemyHealth[id]) {
-                    this.enemies[id].hp = data.enemyHealth[id];
+                this.enemies[id].updatePosition(playerData[id]["pos"][0], playerData[id]["pos"][1]);
+                if (this.enemies[id].hp !== playerData[id]["hp"]) {
+                    this.enemies[id].hp = playerData[id]["hp"];
                     this.enemies[id].updateHealthBar();
                 }
             } else {
-                this.enemies[id] = new Player(data.enemies[id][0], data.enemies[id][1], this.app);
-                this.enemies[id].hp = data.enemyHealth[id];
+                this.enemies[id] = new Player(playerData[id]["pos"][0], playerData[id]["pos"][1], this.app);
+                this.enemies[id].hp = playerData[id]["hp"];
                 this.enemies[id].updateHealthBar();
             }
             newPlayers[id] = this.enemies[id];
+        });
+
+        Object.keys(projectileData).forEach(id => {
+            if (this.projectiles[id]) {
+                this.projectiles[id].updatePosition(projectileData[id]["pos"][0], projectileData[id]["pos"][1]);
+            } else {
+                this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png');
+            }
         });
 
         this.enemies = newPlayers;

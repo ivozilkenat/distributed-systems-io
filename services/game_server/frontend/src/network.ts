@@ -3,8 +3,18 @@ import { Game } from './game';
 
 function getServerUrl() {
     let domain = window.location.host.split(":")[0];
-            return domain + ':3001';
+    let protocol = window.location.protocol;
+    let port = '';
+
+    if (domain === 'localhost') {
+        port = '3001';
+    } else {
+        port = (protocol === 'https:') ? '443' : '80';
+    }
+
+    return `${protocol}//${domain}:${port}`;
 }
+
 
 export function initializeSocket(): Socket {
     const serverUrl: string = getServerUrl();
@@ -12,7 +22,7 @@ export function initializeSocket(): Socket {
 }
 
 export function configureSocketEvents(socket: Socket, game: Game): void {
-    socket.on('update_players', (data: { newpos: [number, number], newHP: number, enemies: Record<string, [number, number]>, enemyHealth: Record<string, number>, canShoot: boolean }): void => {
+    socket.on('update_players', (data: { gameState: any, canShoot: boolean , playerID: string}): void => {
         game.updateGameFromServer(data);
     });
     

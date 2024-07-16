@@ -1,4 +1,4 @@
-import datetime
+import time
 import random
 import math
 
@@ -36,22 +36,46 @@ class Pos:
         distance = abs(-m * self.x + self.y + -origin.y + m * origin.x) / math.sqrt(m ** 2 + 1)
         return distance
 
-
-class Player:
-    def __init__(self, game, pos: Pos, hp: int = 100) -> None:
-        self.game = game
+class Entity:
+    def __init__(self, pos: Pos) -> None:
         self.pos = pos
+        self.hitbox_radius : int = 25
+
+    def is_in_range_of(self, other, range) -> bool:
+        return self.pos.distance_to(other.pos) <= range
+    
+    def is_collision(self, other) -> bool:
+        return self.pos.distance_to(other.pos) <= self.hitbox_radius + other.hitbox_radius
+
+class Projectile (Entity):
+    def __init__(self, pos: Pos, angle: float, speed: float, damage, creator) -> None:
+        super().__init__(pos)
+        self.angle = angle
+        self.speed = speed
+        self.hitbox_radius = 5
+        self.damage = damage
+        self.creator = creator
+        self.uuid = self.generate_uuid()
+
+    def move(self):
+        self.pos.x += self.speed * math.cos(self.angle)
+        self.pos.y += self.speed * math.sin(self.angle)
+
+    def generate_uuid(self):
+        integer_part, fractional_part = str(time.time()).split('.')
+        return integer_part[-3:] + fractional_part[:3] + str(random.randint(0, 1000))
+
+class Player (Entity):
+    def __init__(self, game, pos: Pos, hp: int = 100) -> None:
+        super().__init__(pos)
+        self.game = game
         self.hp = hp
         self.name = "Player #" + str(random.randint(0, 1000))
         self.kills = 0
         self.last_respawned_at = datetime.datetime.now()
         self.equipped_weapon = "Pistol"
         self.cooldown = 0
-        self.hitbox_radius = 25
 
-    def is_in_range_of(self, other, range) -> bool:
-        return self.pos.distance_to(other.pos) <= range
-    
     def is_in_visual_range_of(self, other) -> bool:
         dx, dy = self.pos.x_distance_to(other.pos), self.pos.y_distance_to(other.pos)
         return dx <= X_MAX / 2 and dy <= Y_MAX / 2
@@ -65,9 +89,6 @@ class Player:
         self.pos = get_random_position()
         return delta
     
-    def is_hit_by(self, origin, angle) -> bool:
-        return (self.pos.distance_to_line(origin, angle) <= self.hitbox_radius) and abs(math.atan2(self.pos.y - origin.y, self.pos.x - origin.x) - angle) <= math.pi / 2
- 
     def take_damage(self, damage, source):
         self.hp -= damage
         if self.hp <= 0:
@@ -87,20 +108,10 @@ class Player:
     def on_death(self, seconds_alive):
         self.game.server.matchmaking_api.addHighscore(self.name, self.kills, seconds_alive)
         # TODO communicate death to frontend
-
-    def shoot(self, angle):
-        if self.cooldown > 0:
-            return
-        weapon = self.game.weapons[self.equipped_weapon]
-        hit_enemy = None
-        for _, enemy in self.game.socket_connections.items():
-            if enemy == self:
-                continue
-            if self.is_in_range_of(enemy, weapon['range']) & enemy.is_hit_by(self.pos, angle):
-                if hit_enemy is None or self.pos.distance_to(enemy.pos) < self.pos.distance_to(hit_enemy.pos):
-                    hit_enemy = enemy
-        damage = weapon["damage"]
-        if hit_enemy:
-            print(f"{self.name} touched {hit_enemy.name} in their no-no square.")
-            hit_enemy.take_damage(damage, self)
     
+    def shoot(self, angle):
+        # emit a projectile into the angle, starting next to the player
+        weapon = self.game.weapons[self.equipped_weapon]
+        new_pos = Pos(self.pos.x + math.cos(angle), self.pos.y + math.sin(angle))
+        new_projectile = Projectile(new_pos, angle, weapon.speed, weapon.damage, self)
+        self.game.add_projectile(new_projectile)
