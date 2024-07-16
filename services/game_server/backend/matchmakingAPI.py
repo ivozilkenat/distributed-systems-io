@@ -126,7 +126,8 @@ class MatchmakingAPI:
             while not self.ping() and i < PING_RETRIES and DEPEND_ON_MATCHMAKING:
                 i = i + 1
                 print(f"Ping failed [{i}/{PING_RETRIES}]")
-                await asyncio.sleep(HEARTBEAT_INTERVAL)
+                if i < PING_RETRIES:
+                    await asyncio.sleep(HEARTBEAT_INTERVAL)
 
             if i == PING_RETRIES and DEPEND_ON_MATCHMAKING:
                 sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
