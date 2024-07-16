@@ -1,17 +1,20 @@
 import asyncio
 import json
 import os
+<<<<<<< HEAD
 import time
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
+=======
+>>>>>>> edcfd8376da1745ba44dc02959b4147517bd218c
 from typing import Dict
 from .core import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
 
 
 class Game:    
-    def __init__(self, app) -> None:
-        self.app: FastAPI = app
+    def __init__(self, server) -> None:
+        self.server = server
         self.socket_connections: Dict[str, Player] = {}
         self.projectiles: Dict[str, Player] = {}
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:

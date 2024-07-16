@@ -44,7 +44,7 @@ class Server:
 
     async def _gather_tasks(self) -> None:
         tasks = [
-            *self.get_tasks(),
+            *self._get_tasks(),
         ]
         await asyncio.gather(*tasks)
 

@@ -94,7 +94,8 @@ class Player (Entity):
         if self.hp <= 0:
             if type(source) == Player:
                 self.killed_by(source)
-            self.respawn_and_get_survival_time()
+            seconds_alive = self.respawn_and_get_survival_time()
+            self.on_death(seconds_alive)
 
     def killed(self, victim):
         self.kills += 1
@@ -103,6 +104,9 @@ class Player (Entity):
     
     def killed_by(self, killer):
         killer.killed(self)
+
+    def on_death(self, seconds_alive):
+        self.game.server.matchmaking_api.addHighscore(self.name, self.kills, seconds_alive)
         # TODO communicate death to frontend
     
     def shoot(self, angle):

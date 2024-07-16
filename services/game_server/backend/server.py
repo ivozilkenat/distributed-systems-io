@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi_socketio import SocketManager # type: ignore
 from fastapi.middleware.cors import CORSMiddleware
-from backend.constants import FRONTEND_ROOT_DIR, HOST, PORT, MATCHMAKING_SERVER, SERVER_ID, SERVER_TOKEN
+from backend.constants import FRONTEND_ROOT_DIR, HOST, PORT, APP_MATCHMAKING_HOST, SERVER_ID, SERVER_TOKEN
 from backend.game import Game
 from backend.matchmakingAPI import MatchmakingAPI
 
@@ -26,8 +26,8 @@ class Server:
         self._setup()
         
         self._socket_manager = SocketManager(app=self.app, mount_location="/socket.io")
-        self.game = Game(self.app)
-        self.matchmaking_api = MatchmakingAPI(MATCHMAKING_SERVER, SERVER_ID, SERVER_TOKEN, self.game)
+        self.game = Game(self)
+        self.matchmaking_api = MatchmakingAPI(APP_MATCHMAKING_HOST, SERVER_ID, SERVER_TOKEN, self.game)
         
     def _setup(self) -> None:
         # Middleware
@@ -49,8 +49,8 @@ class Server:
         
     async def _gather_tasks(self) -> None:
         tasks = [
-            *self.get_tasks(),
-            *self.game._get_tasks()
+            *self._get_tasks(),
+            *self.game._get_tasks(),
             *self.matchmaking_api._get_tasks(),
         ]
         await asyncio.gather(*tasks)

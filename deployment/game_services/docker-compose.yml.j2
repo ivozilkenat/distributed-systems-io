@@ -2,7 +2,7 @@ services:
   game_lobby_{{ id }}:
     image: {{ game_image }}
     environment:
-      MATCHMAKING_SERVER: "{{ matchmaking_server }}"
+      APP_MATCHMAKING_HOST: "{{ app_matchmaking_host }}"
       SERVER_NAME: "{{ id }}"
       SERVER_URL: "http://{{ id }}.{{ domain }}"
       # Optional, if you want to reappear as an existing server

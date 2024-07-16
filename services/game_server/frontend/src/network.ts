@@ -3,8 +3,18 @@ import { Game } from './game';
 
 function getServerUrl() {
     let domain = window.location.host.split(":")[0];
-            return domain + ':3001';
+    let protocol = window.location.protocol;
+    let port = '';
+
+    if (domain === 'localhost') {
+        port = '3001';
+    } else {
+        port = (protocol === 'https:') ? '443' : '80';
+    }
+
+    return `${protocol}//${domain}:${port}`;
 }
+
 
 export function initializeSocket(): Socket {
     const serverUrl: string = getServerUrl();
