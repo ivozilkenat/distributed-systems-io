@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 import { Player } from './player.ts';
 import { Socket } from 'socket.io-client';
 
-export async function createApp(GAME_SIZE: [number, number]): Promise<PIXI.Application> {
+export async function createApp(): Promise<PIXI.Application> {
     const app = new PIXI.Application();
     await app.init({ background: '#1099bb', resizeTo: window });
     document.getElementById('game')?.appendChild(app.canvas);
