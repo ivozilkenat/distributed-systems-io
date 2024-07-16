@@ -4,7 +4,7 @@ import asyncio
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from backend.constants import FRONTEND_ROOT_DIR
+from backend.constants import FRONTEND_ROOT_DIR, HOST, PORT
 import logging
 
 
@@ -44,11 +44,16 @@ class Server:
 
     async def _gather_tasks(self) -> None:
         tasks = [
-            asyncio.create_task(self._run_uvicorn_server()),
+            *self._get_tasks(),
         ]
         await asyncio.gather(*tasks)
 
+    def _get_tasks(self):
+        return [
+            asyncio.create_task(self._run_uvicorn_server()),
+        ]
+
     async def _run_uvicorn_server(self) -> None:
-        config = uvicorn.Config(self.app, host="0.0.0.0", port=3000)
+        config = uvicorn.Config(self.app, host=HOST, port=PORT)
         server = uvicorn.Server(config)
         await server.serve()

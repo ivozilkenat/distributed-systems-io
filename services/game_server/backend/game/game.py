@@ -13,7 +13,7 @@ class Game:
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
         
-    def _get_game_tasks(self):
+    def _get_tasks(self):
         return [
             asyncio.create_task(self.update_game_state()), 
             asyncio.create_task(self.broadcast_game_state())

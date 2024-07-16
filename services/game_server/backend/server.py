@@ -1,23 +1,26 @@
 import uvicorn
 import os
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from contextlib import asynccontextmanager
 from fastapi_socketio import SocketManager # type: ignore
 from fastapi.middleware.cors import CORSMiddleware
 from backend.constants import FRONTEND_ROOT_DIR, HOST, PORT, MATCHMAKING_SERVER, SERVER_ID, SERVER_TOKEN
 from backend.game import Game
-from backend.matchmaking_api import MatchmakingAPI
+from backend.matchmakingAPI import MatchmakingAPI
 
 class Server:
     def __init__(self) -> None:
+        
+        # Lifespan events (logoff from matchmaking service on shutdown)
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             print("Startup")
             yield
             print("Shutdown")
             self.matchmaking_api.logoff()
+            
         # FastAPI Setup & SocketManager (socket.io) Setup
         self.app = FastAPI(lifespan=lifespan)
         self._setup()
@@ -46,11 +49,16 @@ class Server:
         
     async def _gather_tasks(self) -> None:
         tasks = [
-            asyncio.create_task(self._run_uvicorn_server()),
-            asyncio.create_task(self.matchmaking_api.ping_loop()),
-            *self.game._get_game_tasks()
+            *self.get_tasks(),
+            *self.game._get_tasks()
+            *self.matchmaking_api._get_tasks(),
         ]
         await asyncio.gather(*tasks)
+
+    def _get_tasks(self):
+        return [
+            asyncio.create_task(self._run_uvicorn_server()),
+        ]
 
     async def _run_uvicorn_server(self) -> None:
         config = uvicorn.Config(self.app, host=HOST, port=PORT)

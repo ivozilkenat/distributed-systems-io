@@ -2,13 +2,19 @@ import * as PIXI from 'pixi.js';
 import { Player } from './player.ts';
 import { Socket } from 'socket.io-client';
 
-export async function createApp(GAME_SIZE: [number, number]): Promise<PIXI.Application> {
+export async function createApp(): Promise<PIXI.Application> {
     const app = new PIXI.Application();
     await app.init({ background: '#1099bb', resizeTo: window });
+    window.addEventListener('resize', () => resizeCanvas(app), false);
+
     document.getElementById('game')?.appendChild(app.canvas);
     return app;
 }
 
+function resizeCanvas(app: PIXI.Application) {
+    app.canvas.width = window.innerWidth;
+    app.canvas.height = window.innerHeight;
+  }
 
 function createGraphicsContext(): PIXI.Graphics {
     let graphics = new PIXI.Graphics();
@@ -28,21 +34,23 @@ export class Game {
     socket: Socket;
     app: PIXI.Application;
     keys: Record<string, boolean>;
-    gameSize: number[];
     graphicsContext: PIXI.Graphics;
     
 
-    constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>, gameSize: number[]
+    constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
     ) {
         let graphicsContext = createGraphicsContext();
         this.enemies = {};
         this.socket = socket;
         this.app = app;
         this.keys = keys;
-        this.gameSize = gameSize;
         this.graphicsContext = graphicsContext;
-        this.player = new Player(0, 0, app, graphicsContext, gameSize);
         this.map = this.initMap()
+        this.player = new Player(0, 0, app, graphicsContext);
+    }
+
+    get gameSize(): number[] {
+        return [this.app.canvas.width, this.app.canvas.height];
     }
 
     initMap(): PIXI.Sprite {
@@ -127,7 +135,7 @@ export class Game {
                     this.enemies[id].updateHealthBar();
                 }
             } else {
-                this.enemies[id] = new Player(data.enemies[id][0], data.enemies[id][1], this.app, this.graphicsContext, this.gameSize);
+                this.enemies[id] = new Player(data.enemies[id][0], data.enemies[id][1], this.app, this.graphicsContext);
                 this.enemies[id].hp = data.enemyHealth[id];
                 this.enemies[id].updateHealthBar();
             }

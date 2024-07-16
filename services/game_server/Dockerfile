@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y curl gnupg && \
 RUN npm install -g bun
 
 # We wont use venvs here, because a container itself is isolated and we don't need venvs here
-RUN cd /app/frontend && bun install && bun run build && cd /app/backend && pip install -r requirements.txt
+RUN cd /app/frontend && bun install && bun run build 
+RUN cd /app/backend && pip install -r requirements.txt
 
 # Expose the port the server listens on
 EXPOSE 3001
