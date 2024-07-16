@@ -20,5 +20,6 @@ export function configureSocketEvents(socket: Socket, game: Game): void {
         leaderboard: [string, number][] 
     }): void => {
         game.updateLeaderboard(data.leaderboard);
+
     });
 }

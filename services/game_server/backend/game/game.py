@@ -44,6 +44,8 @@ class Game:
 
     async def update_players(self, exclude_id=None) -> None:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+        
+        await self.broadcast_leaderboard()
         for player_id, player in connections: 
             if player_id == exclude_id:
                 continue
@@ -66,7 +68,6 @@ class Game:
                 "newHP": player.hp,
                 "canShoot": player.cooldown == 0,
             }, room=player_id)
-        await self.broadcast_leaderboard()
 
 
     async def broadcast_leaderboard(self) -> None:
@@ -74,6 +75,6 @@ class Game:
         leaderboard = {player_id: player.kills for player_id, player in connections}
         sorted_leaderboard = sorted(leaderboard.items(), key=lambda item: item[1], reverse=True)
         for player_id, player in connections:
-            await self.server.sio.emit("leaderboard", {
+            await self.server.app.sio.emit("current_leaderboard", {
                 "leaderboard": sorted_leaderboard,
             }, room=player_id)

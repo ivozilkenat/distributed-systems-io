@@ -12,17 +12,15 @@ export class Player {
     container: PIXI.Container;
     healthBar: PIXI.Container;
     canShoot: boolean = false;
-    graphicsContext: PIXI.Graphics;
     app: PIXI.Application;
 
-    constructor(x: number, y: number, app: PIXI.Application, barContext: PIXI.Graphics) {
+    constructor(x: number, y: number, app: PIXI.Application) {
         this.x = x;
         this.y = y;
         this.targetX = x;
         this.targetY = y;
         this.lastUpdateTime = Date.now();
         this.hp = MAX_HP;
-        this.graphicsContext = barContext;
         this.app = app;
         this.container = this.initContainer();
         this.healthBar = this.initHealthBar();
@@ -33,9 +31,19 @@ export class Player {
         return [this.app.canvas.width, this.app.canvas.height];
     }
 
+    createHpBarGraphics(): PIXI.Graphics {
+        let graphics = new PIXI.Graphics();
+        return graphics.poly([
+            12, 10,
+            12 + (100), 10,
+            8 + (100), 20,
+            8, 20
+        ]).fill('white')
+    }
+
     initHealthBar(): PIXI.Container {
         let hpBar: PIXI.Container = new PIXI.Container();
-        hpBar.addChild(new PIXI.Graphics(this.graphicsContext));
+        hpBar.addChild(new PIXI.Graphics(this.createHpBarGraphics()));
         hpBar.addChild(new PIXI.Graphics());
         hpBar.pivot.set(0.5, 0.5);
         this.container.addChild(hpBar);
@@ -51,15 +59,15 @@ export class Player {
     redrawBar(bar: PIXI.Graphics, fill: number, color: string) {
         bar.clear();
         bar.poly([
-            12, 10, 
+            12, 10,
             12 + (100 * fill), 10,
-            8 + (100 * fill), 20, 
+            8 + (100 * fill), 20,
             8, 20
         ]);
         bar.fill(color);
     }
 
-    initContainer(): PIXI.Container{
+    initContainer(): PIXI.Container {
         let container: PIXI.Container = new PIXI.Container();
         container.addChild(this.initSprite());
         this.app.stage.addChild(container);
