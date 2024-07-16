@@ -25,7 +25,8 @@ class MatchmakingAPI:
     def post(self, path: str, request):
         try:
             return requests.post(self.url_base + path, json=request)
-        except:
+        except Exception as e:
+            print("Could not post:", e)
             return False
 
     def isRegistered(self):
