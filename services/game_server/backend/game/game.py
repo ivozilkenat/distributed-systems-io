@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import time
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 from typing import Dict
@@ -12,6 +13,7 @@ class Game:
     def __init__(self, app) -> None:
         self.app: FastAPI = app
         self.socket_connections: Dict[str, Player] = {}
+        self.projectiles: Dict[str, Player] = {}
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
         
@@ -23,6 +25,9 @@ class Game:
 
     def get_player_count(self):
         return len(self.socket_connections)
+    
+    def add_projectile(self, projectile):
+        self.projectiles[projectile.uuid] = projectile
 
     async def update_game_state(self) -> None:
         while True:
@@ -44,27 +49,39 @@ class Game:
             #print("Broadcasting game state")
             await asyncio.sleep(BROADCAST_INTERVAL)
 
-    async def update_players(self, exclude_id=None) -> None:
+    def check_collisions(players) -> None:
+        projectiles_to_destroy = []
+        for _, projectile in self.projectiles.items():
+            for _, player in players:
+                if self.is_collision(player, projectile):
+                    player.take_damage(projectile.damage, projectile.creator)
+                    projectiles_to_destroy.append(projectile.uuid)
+
+            for _, other_projectile in self.projectiles.items():
+                if self.is_collision(projectile, other_projectile):
+                    projectiles_to_destroy.append(projectile)
+                    projectiles_to_destroy.append(other_projectile)
+
+        projectiles_to_destroy = list(set(projectiles_to_destroy))
+        for projectile in projectiles_to_destroy:
+            del self.projectiles[projectile]
+
+    async def update_players(self) -> None:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+
+        self.check_collisions(connections)
+
+        gameState = {
+            "players": {pid: {"pos": list(p.pos), "hp": list(p.hp)} for pid, p in self.socket_connections.items()},
+            "projectiles": {pid: {"pos": list(p.pos)} for pid, p in self.projectiles.items()}
+        }
+
         for player_id, player in connections: 
-            if player_id == exclude_id:
-                continue
-            enemy_positions = {}
-            enemy_health = {}
-            for opponent_id, opponent in connections:
-                if player_id == opponent_id:
-                    continue
-                if (player.is_in_visual_range_of(opponent) or True): # TODO: currently always true for smooth interpolation (find different range metric, like max distance in one update on top)
-                    enemy_positions[opponent_id] = list(opponent.pos) # Id necessary for frontend to identify players (this is very ugly right now, refactor later)
-                    enemy_health[opponent_id] = opponent.hp
-                        
             player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
 
             # TODO: this is ugly, refactor
             await self.app.sio.emit("update_players", {
-                "enemies": enemy_positions,
-                "enemyHealth": enemy_health,
-                "newpos": list(player.pos),
-                "newHP": player.hp,
+                "gameState": gameState,
                 "canShoot": player.cooldown == 0,
+                "playerId": player_id
             }, room=player_id)
