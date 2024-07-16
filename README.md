@@ -29,7 +29,7 @@
 
 ##### Actions
 
-*Deploy using local container (e.g. your code changes in game_server or matchmaking_server):*
+*Deploy using local container (e.g. your code changes in game_server or app_matchmaking_host):*
 * Please use the images and domain environmental variables as listed in localhost.env in your deployment/.env file
 * Then run `make deploy-local`
 
@@ -49,7 +49,7 @@
 + Run `docker compose up`
 
 Run the matchmaking server:
-+ Go into services/matchmaking_server
++ Go into services/app_matchmaking_host
 + Activate venv (e.g. with `source backend/venv/bin/activate`)
 + Run server with `python main.py`
 
@@ -60,8 +60,8 @@ Run the matchmaking server:
   + `DEPEND_ON_MATCHMAKING`: Set to 0 if you want the game server to start without the matchmaking server 
   + `HOST`: Host name of the Server, defaults to 0.0.0.0, but could (should) be `localhost` for example
   + `PORT`: Port of the Server, defaults to 3001
-  + `SERVER_NAME`: Name of the lobby which gets sent to the matchmaking_server, defaults to `Unbekannt`
-  + `SERVER_URL`: The url of the lobby which gets sent to the matchmaking_server, defaults to `http://{HOST}:{PORT}`
+  + `SERVER_NAME`: Name of the lobby which gets sent to the app_matchmaking_host, defaults to `Unbekannt`
+  + `SERVER_URL`: The url of the lobby which gets sent to the app_matchmaking_host, defaults to `http://{HOST}:{PORT}`
   + Credentials `SERVER_ID` and `SERVER_TOKEN`, not set by default
-    Only use these, if you want to re log into the matchmaking_server, you probably do not need them.
+    Only use these, if you want to re log into the app_matchmaking_host, you probably do not need them.
 + Run server with `python main.py`
