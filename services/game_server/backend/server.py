@@ -30,7 +30,7 @@ class Server:
         # Middleware
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],  # Adjust this to more strict settings in production
+            allow_origins=["*"],  # TODO: Adjust this to more strict settings in production (also add to matchmaking service)
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
