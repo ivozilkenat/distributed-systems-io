@@ -14,9 +14,8 @@ export class Player {
     canShoot: boolean = false;
     graphicsContext: PIXI.Graphics;
     app: PIXI.Application;
-    gameSize: number[];
 
-    constructor(x: number, y: number, app: PIXI.Application, barContext: PIXI.Graphics, gameSize: number[]) {
+    constructor(x: number, y: number, app: PIXI.Application, barContext: PIXI.Graphics) {
         this.x = x;
         this.y = y;
         this.targetX = x;
@@ -25,10 +24,13 @@ export class Player {
         this.hp = MAX_HP;
         this.graphicsContext = barContext;
         this.app = app;
-        this.gameSize = gameSize;
         this.container = this.initContainer();
         this.healthBar = this.initHealthBar();
         this.updateHealthBar();
+    }
+
+    get gameSize(): number[] {
+        return [this.app.canvas.width, this.app.canvas.height];
     }
 
     initHealthBar(): PIXI.Container {

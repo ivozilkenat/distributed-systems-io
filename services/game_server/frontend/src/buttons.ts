@@ -1,11 +1,12 @@
 import * as PIXI from 'pixi.js';
 import { Game } from './game';
 
-export function setupButtons(app: PIXI.Application, GAME_SIZE: [number, number], game: Game): void {
-    const joinButton: PIXI.Sprite = createButton('/dist/joinButton.png',  [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 150], () => {
+export function setupButtons(app: PIXI.Application, game: Game): void {
+    const gameSize = [app.canvas.width, app.canvas.height]
+    const joinButton: PIXI.Sprite = createButton('/dist/joinButton.png',  [gameSize[0] / 2, gameSize[1] / 2 + 150], () => {
         game.joinGame();
     });
-    const leaveButton: PIXI.Sprite = createButton('/dist/leaveButton.png',  [GAME_SIZE[0] / 2, GAME_SIZE[1] / 2 + 250], () => {
+    const leaveButton: PIXI.Sprite = createButton('/dist/leaveButton.png',  [gameSize[0] / 2, gameSize[1] / 2 + 250], () => {
         game.leaveGame();
     });
 
