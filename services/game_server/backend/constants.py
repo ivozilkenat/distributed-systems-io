@@ -18,7 +18,7 @@ PING_RETRIES = 3
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "3001"))
 
-MATCHMAKING_SERVER = os.getenv('MATCHMAKING_SERVER', "http://localhost:3000")
+APP_MATCHMAKING_HOST = os.getenv('APP_MATCHMAKING_HOST', "http://localhost:3000")
 SERVER_NAME = os.getenv('SERVER_NAME', os.getenv('HOSTNAME', "Unbenannt"))
 SERVER_URL = os.getenv('SERVER_URL', f'http://{HOST}:{PORT}/')
 SERVER_ID = os.getenv('SERVER_ID')
