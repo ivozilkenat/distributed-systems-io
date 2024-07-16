@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     apt-get install -y nodejs
 
 # We wont use venvs here, because a container itself is isolated and we don't need venvs here
-RUN cd /app/frontend && bun install && bun run build 
+RUN cd /app/frontend && npm install
 RUN cd /app/backend && pip install -r requirements.txt
 
 # Expose the port the server listens on
