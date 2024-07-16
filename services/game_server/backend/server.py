@@ -23,7 +23,7 @@ class Server:
         self._setup()
         
         self._socket_manager = SocketManager(app=self.app, mount_location="/socket.io")
-        self.game = Game(self.app)
+        self.game = Game(self)
         self.matchmaking_api = MatchmakingAPI(MATCHMAKING_SERVER, SERVER_ID, SERVER_TOKEN, self.game)
         
     def _setup(self) -> None:

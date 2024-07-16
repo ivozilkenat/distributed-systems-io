@@ -40,12 +40,3 @@ def setup_ws_handler(server: Server):
         del server.game.socket_connections[sid]
         server.matchmaking_api.ping()
         await server.game.update_players()
-
-    # TODO call this when the player gets killed
-    def on_player_killed(sid, player: Player):
-        name = player.name
-        kills = player.kills
-        survival_time = player.respawn_and_get_survival_time()
-        seconds_alive = survival_time.total_seconds()
-
-        server.matchmaking_api.addHighscore(name, kills, seconds_alive)

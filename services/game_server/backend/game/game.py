@@ -1,16 +1,14 @@
 import asyncio
 import json
 import os
-from fastapi import FastAPI
-from fastapi_socketio import SocketManager
 from typing import Dict
 from .core import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
 
 
 class Game:    
-    def __init__(self, app) -> None:
-        self.app: FastAPI = app
+    def __init__(self, server) -> None:
+        self.server = server
         self.socket_connections: Dict[str, Player] = {}
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
@@ -61,7 +59,7 @@ class Game:
             player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
 
             # TODO: this is ugly, refactor
-            await self.app.sio.emit("update_players", {
+            await self.server.app.sio.emit("update_players", {
                 "enemies": enemy_positions,
                 "enemyHealth": enemy_health,
                 "newpos": list(player.pos),
