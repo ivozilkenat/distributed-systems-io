@@ -133,7 +133,7 @@ class MatchmakingAPI:
             await asyncio.sleep(HEARTBEAT_INTERVAL)
 
     def updateGameServerProperties(self, name: str, url: str):
-            if not self.isRegistered():
+        if not self.isRegistered():
             return False
 
         response = self.post("/game_servers/update", {"name": name, "url": url})
