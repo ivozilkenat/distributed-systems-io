@@ -16,7 +16,7 @@ class MatchmakingAPI:
         self.id = id
         self.token = token
         self.game = game
-        
+
     def _get_tasks(self):
         return [
             asyncio.create_task(self.ping_loop())
@@ -64,7 +64,7 @@ class MatchmakingAPI:
                 with open(CREDENTIALS_FILE, "r") as f:
                     credentials = json.load(f)
                     if ("id" in credentials) and ("token" in credentials):
-                        self.id = credentials["id"]
+                        self.id = int(credentials["id"])
                         self.token = credentials["token"]
                     else:
                         print("Invalid input file")
@@ -137,7 +137,7 @@ class MatchmakingAPI:
         if not self.isRegistered():
             return False
 
-        response = self.post("/game_servers/update", {"name": name, "url": url})
+        response = self.post("/game_servers/update", {"name": name, "url": url, "id": self.id, "token": self.token})
 
         if not response:
             return False
