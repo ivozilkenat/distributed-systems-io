@@ -1,8 +1,7 @@
 import { Socket } from 'socket.io-client';
 import * as PIXI from 'pixi.js';
 import { configureSocketEvents, initializeSocket } from './network';
-import { createApp, Game } from './game';
-import { setupButtons } from './buttons';
+import { createApp, Game } from './game'; 
 import { initializeKeyMapping } from './keys';
 import { loadAssets } from './assets';
 
@@ -14,7 +13,6 @@ async function main(): Promise<void> {
     const game: Game = new Game(app, socket, keys);
 
     configureSocketEvents(socket, game);
-    setupButtons(app, game);
 
     console.log("Starting game loop");
     game.loop();

@@ -45,8 +45,8 @@ export class Game {
         this.app = app;
         this.keys = keys;
         this.graphicsContext = graphicsContext;
-        this.player = new Player(0, 0, app, graphicsContext);
         this.map = this.initMap()
+        this.player = new Player(0, 0, app, graphicsContext);
     }
 
     get gameSize(): number[] {
