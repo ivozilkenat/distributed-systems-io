@@ -29,14 +29,7 @@ def setup_ws_handler(server: Server):
             player.shoot(angle)
 
     @server.app.sio.on('connect')
-    async def client_side_receive_msg(sid, env):
+    async def client_side_receive_msg(sid, _):
         server.game.socket_connections[sid] = Player(server.game, Pos(random_position(X_MAX), random_position(Y_MAX)))
-        server.matchmaking_api.ping()
-        await server.game.update_players()
-
-
-    @server.app.sio.on('disconnect')
-    async def client_side_receive_msg(sid):
-        del server.game.socket_connections[sid]
         server.matchmaking_api.ping()
         await server.game.update_players()

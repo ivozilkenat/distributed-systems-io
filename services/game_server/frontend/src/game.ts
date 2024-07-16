@@ -35,6 +35,7 @@ export class Game {
     app: PIXI.Application;
     keys: Record<string, boolean>;
     graphicsContext: PIXI.Graphics;
+    leaderboard: [string, number][];
     
 
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
@@ -47,6 +48,7 @@ export class Game {
         this.graphicsContext = graphicsContext;
         this.map = this.initMap()
         this.player = new Player(0, 0, app, graphicsContext);
+        this.leaderboard = [];
     }
 
     get gameSize(): number[] {
@@ -143,5 +145,28 @@ export class Game {
         });
 
         this.enemies = newPlayers;
+    }
+
+    updateLeaderboard(leaderboard: [string, number][]): void{
+        this.leaderboard = leaderboard;
+    }
+
+    drawLeaderboard(): void {
+        const x = this.gameSize[0] / 2 - 150;
+        const y = 50;
+        const width = 300;
+        const height = this.leaderboard.length * 20 + 20;
+    
+        this.graphicsContext.beginFill(0x000000, 0.7);
+        this.graphicsContext.drawRect(x, y, width, height);
+        this.graphicsContext.endFill();
+    
+        this.leaderboard.forEach((entry, index) => {
+            const textY = y + 20 + index * 20;
+            let text = new PIXI.Text(`${entry[0]}: ${entry[1]}`, new PIXI.TextStyle({ fontFamily: 'Arial', fontSize: 15, fill: 'white' }));
+            text.x = x + 10;
+            text.y = textY;
+            this.app.stage.addChild(text);
+        });
     }
 }

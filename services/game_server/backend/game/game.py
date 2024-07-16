@@ -66,3 +66,14 @@ class Game:
                 "newHP": player.hp,
                 "canShoot": player.cooldown == 0,
             }, room=player_id)
+        await self.broadcast_leaderboard()
+
+
+    async def broadcast_leaderboard(self) -> None:
+        connections = list(self.socket_connections.items())
+        leaderboard = {player_id: player.kills for player_id, player in connections}
+        sorted_leaderboard = sorted(leaderboard.items(), key=lambda item: item[1], reverse=True)
+        for player_id, player in connections:
+            await self.server.sio.emit("leaderboard", {
+                "leaderboard": sorted_leaderboard,
+            }, room=player_id)

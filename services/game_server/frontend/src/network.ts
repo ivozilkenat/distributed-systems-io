@@ -15,4 +15,10 @@ export function configureSocketEvents(socket: Socket, game: Game): void {
     socket.on('update_players', (data: { newpos: [number, number], newHP: number, enemies: Record<string, [number, number]>, enemyHealth: Record<string, number>, canShoot: boolean }): void => {
         game.updateGameFromServer(data);
     });
+    
+    socket.on('current_leaderboard', (data: { 
+        leaderboard: [string, number][] 
+    }): void => {
+        game.updateLeaderboard(data.leaderboard);
+    });
 }
