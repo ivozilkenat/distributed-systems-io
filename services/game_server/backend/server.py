@@ -50,7 +50,7 @@ class Server:
     async def _gather_tasks(self) -> None:
         tasks = [
             *self._get_tasks(),
-            *self.game._get_tasks()
+            *self.game._get_tasks(),
             *self.matchmaking_api._get_tasks(),
         ]
         await asyncio.gather(*tasks)
