@@ -19,8 +19,8 @@ export class Entity {
         this.targetY = y;
         this.lastUpdateTime = Date.now();
         this.app = app;
-        this.container = this.initContainer();
         this.spritePath = spritePath;
+        this.container = this.initContainer();
     }
 
     get gameSize(): number[] {
@@ -76,5 +76,9 @@ export class Entity {
 
     readdToCanvas(): void {
         this.app.stage.addChild(this.container);
+    }
+
+    relativeToPlayerTranslation(player: any): (x: number, y: number) => [number, number] {
+        return (x: number, y: number): [number, number] => [x - player.x + this.gameSize[0] / 2, y - player.y + this.gameSize[1] / 2];
     }
 }

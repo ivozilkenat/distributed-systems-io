@@ -85,6 +85,10 @@ export class Game {
             enemy.readdToCanvas();
             enemy.updateDraw(enemy.relativeToPlayerTranslation(this.player));
         });
+        Object.values(this.projectiles).forEach((projectile: Entity) => {
+            projectile.readdToCanvas();
+            projectile.updateDraw(projectile.relativeToPlayerTranslation(this.player));
+        });
         const t =  (x: number, y: number) => this.player.relativeToPlayerTranslation(this.player)(x, y);
         this.player.updateDraw(t);
     }
@@ -101,7 +105,13 @@ export class Game {
         });
     }
 
-     joinGame(): void {
+    clearProjectiles(): void {
+        Object.values(this.projectiles).forEach((projectile: Entity) => {
+            projectile.removeFromCanvas();
+        });
+    }
+
+    joinGame(): void {
         this.enemies = {};
         this.socket.connect();
         this.app.stage.addChild(this.map, this.player.container);
@@ -117,22 +127,24 @@ export class Game {
     updateGameFromServer(data: {
         gameState: any,
         canShoot: boolean,
-        playerID: string,
+        playerId: string,
     }): void {
-        let playerID = data.playerID;
+        let playerId = data.playerId;
         let playerData = data.gameState["players"]
         let projectileData = data.gameState["projectiles"]
-        this.player.updatePosition(playerData[playerID]["pos"][0], playerData[playerID]["pos"][1]);
-        this.player.hp = playerData[playerID]["hp"];
+        this.player.updatePosition(playerData[playerId]["pos"][0], playerData[playerId]["pos"][1]);
+        this.player.hp = playerData[playerId]["hp"];
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
 
         const newPlayers: Record<string, Player> = {};
 
         this.clearEnemies();
+        this.clearProjectiles();
 
         Object.keys(playerData).forEach(id => {
-            if (id === playerID) return;
+
+            if (id === playerId) return;
             if (this.enemies[id]) {
                 this.enemies[id].updatePosition(playerData[id]["pos"][0], playerData[id]["pos"][1]);
                 if (this.enemies[id].hp !== playerData[id]["hp"]) {

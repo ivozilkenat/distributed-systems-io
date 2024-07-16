@@ -113,6 +113,8 @@ class Player (Entity):
     def shoot(self, angle):
         # emit a projectile into the angle, starting next to the player
         weapon = self.game.weapons[self.equipped_weapon]
-        new_pos = Pos(self.pos.x + math.cos(angle), self.pos.y + math.sin(angle))
-        new_projectile = Projectile(new_pos, angle, weapon.speed, weapon.damage, self)
+        distance = 100
+        new_pos = Pos(self.pos.x + distance * math.cos(angle), self.pos.y + distance * math.sin(angle))
+        new_projectile = Projectile(new_pos, angle, weapon["speed"], weapon["damage"], self)
         self.game.add_projectile(new_projectile)
+        print(f"Spawned projectile {new_projectile.uuid} at {new_projectile.pos}")

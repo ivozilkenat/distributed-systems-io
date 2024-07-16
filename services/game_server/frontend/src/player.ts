@@ -43,9 +43,5 @@ export class Player extends Entity {
         bar.fill(color);
     }
 
-    relativeToPlayerTranslation(player: Player): (x: number, y: number) => [number, number] {
-        return (x: number, y: number): [number, number] => [x - player.x + this.gameSize[0] / 2, y - player.y + this.gameSize[1] / 2];
-    }
-
     
 }
