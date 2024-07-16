@@ -8,7 +8,7 @@ from fastapi_socketio import SocketManager # type: ignore
 from fastapi.middleware.cors import CORSMiddleware
 from backend.constants import FRONTEND_ROOT_DIR, HOST, PORT, MATCHMAKING_SERVER, SERVER_ID, SERVER_TOKEN
 from backend.game import Game
-from backend.matchmaking_api import MatchmakingAPI
+from backend.matchmakingAPI import MatchmakingAPI
 
 class Server:
     def __init__(self) -> None:
