@@ -60,12 +60,16 @@ export class Game {
         this.app.stage.addChild(map);
         map.interactive = true;
         map.on('click', (evt: any) => {
-            if (this.player.canShoot) {
-                let angle = Math.atan2(evt.data.global.y - this.gameSize[1] / 2, evt.data.global.x - this.gameSize[0] / 2);
-                this.socket.emit("player_click", angle);
-            }
+            this.try_shoot([evt.data.global.x, evt.data.global.y]);
         });
         return map;
+    }
+
+    try_shoot(pos: number[]): void {
+        if(this.player.canShoot) {
+            let angle = Math.atan2(pos[1] - this.gameSize[1] / 2, pos[0] - this.gameSize[0] / 2);
+            this.socket.emit("player_click", angle);
+        }
     }
 
     loop(): void {
@@ -74,6 +78,12 @@ export class Game {
             if (this.keys['left']) this.socket.emit('player_move', [-1, 0]);
             if (this.keys['up']) this.socket.emit('player_move', [0, -1]);
             if (this.keys['down']) this.socket.emit('player_move', [0, 1]);
+            if (this.keys['space']) {
+                // TODO fix this if you can
+                // const mousePosition = this.app.renderer.plugins.interaction.mouse.global; // @ts-ignore
+                // this.try_shoot([1, 3]);
+                console.log("pew pew");
+            };
             this.leaderboardGraphic!.visible = this.keys['tab'];
             this.draw();
         });
