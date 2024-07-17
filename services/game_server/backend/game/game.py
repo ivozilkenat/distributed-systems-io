@@ -7,7 +7,6 @@ from typing import Dict
 from .player import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
 
-
 class Game:    
     def __init__(self, server) -> None:
         self.server = server
@@ -123,7 +122,7 @@ class Game:
 
     async def broadcast_leaderboard(self) -> None:
         connections = list(self.socket_connections.items())
-        leaderboard = {player_id: player.kills for player_id, player in connections}
+        leaderboard = {player.name: player.kills for player_id, player in connections}
         sorted_leaderboard = sorted(leaderboard.items(), key=lambda item: item[1], reverse=True)
         for player_id, player in connections:
             await self.server.app.sio.emit("current_leaderboard", {
