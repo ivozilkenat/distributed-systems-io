@@ -5,6 +5,7 @@ import { MAXHP as MAX_HP } from './constants.ts';
 
 export class Player extends Entity {
     hp: number;
+    name: string = "Unknown Player";
     healthBar: PIXI.Container;
     canShoot: boolean = false;
 

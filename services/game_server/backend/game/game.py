@@ -13,9 +13,20 @@ class Game:
         self.server = server
         self.socket_connections: Dict[str, Player] = {}
         self.projectiles: Dict[str, Player] = {}
+        self.projectiles_to_destroy = []
+        self.reset_events()
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
         
+    def reset_events(self):
+        self.latest_events = []
+    
+    def register_event(self, event_type, event_data):
+        self.latest_events.append({
+            "event_type": event_type,
+            "event_data": event_data
+        })
+
     def _get_tasks(self):
         return [
             asyncio.create_task(self.update_game_state()), 
@@ -28,14 +39,34 @@ class Game:
     def add_projectile(self, projectile):
         self.projectiles[projectile.uuid] = projectile
 
+    def destroy_projectile(self, projectile):
+        self.projectiles_to_destroy.append(projectile.uuid)
+
+    def destroy_projectiles(self):
+        self.projectiles_to_destroy = list(set(self.projectiles_to_destroy))
+       
+        for projectile in self.projectiles_to_destroy:
+            del self.projectiles[projectile]
+
+        self.projectiles_to_destroy = []
+
     async def update_game_state(self) -> None:
         while True:
+            connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+
             # Logic to update the game state
             # For example, update player positions, check for collisions, etc.
             
+            self.move_projectiles()
+
+            self.check_collisions(connections)
+
+            for _, player in connections:
+                player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
+                player.currentmove = 0
             
             # Run this update at fixed intervals (e.g., 60 times per second)
-            #print("Updating game state")
+            # print("Updating game state")
             await asyncio.sleep(STATE_UPDATE_INTERVAL)
             
     async def broadcast_game_state(self) -> None:
@@ -48,44 +79,47 @@ class Game:
             #print("Broadcasting game state")
             await asyncio.sleep(BROADCAST_INTERVAL)
 
-    def check_collisions(players) -> None:
-        projectiles_to_destroy = []
+    def move_projectiles(self) -> None:
+        for _, projectile in self.projectiles.items():
+            projectile.move()
+        
+
+    def check_collisions(self, players) -> None:
         for _, projectile in self.projectiles.items():
             for _, player in players:
-                if self.is_collision(player, projectile):
+                if player.is_collision(projectile):
                     player.take_damage(projectile.damage, projectile.creator)
-                    projectiles_to_destroy.append(projectile.uuid)
+                    projectile.destroy()
 
             for _, other_projectile in self.projectiles.items():
-                if self.is_collision(projectile, other_projectile):
-                    projectiles_to_destroy.append(projectile)
-                    projectiles_to_destroy.append(other_projectile)
+                if projectile.uuid == other_projectile.uuid:
+                    continue
+                if projectile.is_collision(other_projectile):
+                    projectile.destroy()
+                    other_projectile.destroy()
 
-        projectiles_to_destroy = list(set(projectiles_to_destroy))
-        for projectile in projectiles_to_destroy:
-            del self.projectiles[projectile]
+        self.destroy_projectiles()
+        
 
     async def update_players(self) -> None:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
         
         await self.broadcast_leaderboard()
 
-        self.check_collisions(connections)
-
         gameState = {
-            "players": {pid: {"pos": list(p.pos), "hp": list(p.hp)} for pid, p in self.socket_connections.items()},
+            "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name} for pid, p in self.socket_connections.items()},
             "projectiles": {pid: {"pos": list(p.pos)} for pid, p in self.projectiles.items()}
         }
 
         for player_id, player in connections: 
-            player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
-
-            # TODO: this is ugly, refactor
-            await self.app.sio.emit("update_players", {
+            await self.server.app.sio.emit("update_players", {
                 "gameState": gameState,
-                "canShoot": player.cooldown == 0,
+                "canShoot": player.cooldown <= 0,
+                "playerId": player_id,
+                "events": self.latest_events
             }, room=player_id)
 
+        self.reset_events()
 
     async def broadcast_leaderboard(self) -> None:
         connections = list(self.socket_connections.items())

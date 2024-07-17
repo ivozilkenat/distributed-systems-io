@@ -1,10 +1,13 @@
+import json
+
 import requests
 import logging
 from typing import Union
-from backend.constants import HEARTBEAT_INTERVAL, SERVER_NAME, SERVER_URL, DEPEND_ON_MATCHMAKING
+from backend.constants import HEARTBEAT_INTERVAL, SERVER_NAME, SERVER_URL, DEPEND_ON_MATCHMAKING, CREDENTIALS_FILE, PING_RETRIES
 from backend.game import Game
 import asyncio
 import sys
+import os
 
 
 class MatchmakingAPI:
@@ -13,7 +16,7 @@ class MatchmakingAPI:
         self.id = id
         self.token = token
         self.game = game
-        
+
     def _get_tasks(self):
         return [
             asyncio.create_task(self.ping_loop())
@@ -22,7 +25,8 @@ class MatchmakingAPI:
     def post(self, path: str, request):
         try:
             return requests.post(self.url_base + path, json=request)
-        except:
+        except Exception as e:
+            print("Could not post:", e)
             return False
 
     def isRegistered(self):
@@ -42,6 +46,7 @@ class MatchmakingAPI:
             credentials = response.json()
             self.id = credentials["id"]
             self.token = credentials["token"]
+            self.saveCredentials()
             return True
         elif response.status_code == 400:
             logging.error("Could not register: URL already taken")
@@ -52,6 +57,28 @@ class MatchmakingAPI:
 
     def registerFromConstants(self):
         return self.register(SERVER_NAME, SERVER_URL)
+
+    def loadCredentialsIfAvailable(self):
+        if os.path.isfile(CREDENTIALS_FILE) and os.access(CREDENTIALS_FILE, os.R_OK):
+            try:
+                with open(CREDENTIALS_FILE, "r") as f:
+                    credentials = json.load(f)
+                    if ("id" in credentials) and ("token" in credentials):
+                        self.id = int(credentials["id"])
+                        self.token = credentials["token"]
+                    else:
+                        print("Invalid input file")
+            except IOError as e:
+                print("Could not load credentials:", e)
+        else:
+            print("No credentials file found")
+
+    def saveCredentials(self):
+        try:
+            with open(CREDENTIALS_FILE, "w") as outfile:
+                json.dump({"id": self.id, "token": self.token}, outfile)
+        except IOError as e:
+            print("Could not save credentials:", e)
 
     def register(self, name: str, url: str):
         if self.isRegistered():
@@ -90,25 +117,28 @@ class MatchmakingAPI:
         return response.status_code == 200
 
     async def ping_loop(self) -> None:
+        self.loadCredentialsIfAvailable()
         if not self.registerFromConstants() and DEPEND_ON_MATCHMAKING:
             sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
 
         while self.isRegistered():
-            if not self.ping():
-                print("Ping failed [1/3]")
-                if not self.ping():
-                    print("Ping failed [2/3]")
-                    if not self.ping():
-                        print("Ping failed [3/3]; stopping now")
-                        if DEPEND_ON_MATCHMAKING:
-                            sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
+            i = 0
+            while not self.ping() and i < PING_RETRIES and DEPEND_ON_MATCHMAKING:
+                i = i + 1
+                print(f"Ping failed [{i}/{PING_RETRIES}]")
+                if i < PING_RETRIES:
+                    await asyncio.sleep(HEARTBEAT_INTERVAL)
+
+            if i == PING_RETRIES and DEPEND_ON_MATCHMAKING:
+                sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
+
             await asyncio.sleep(HEARTBEAT_INTERVAL)
 
     def updateGameServerProperties(self, name: str, url: str):
         if not self.isRegistered():
             return False
 
-        response = self.post("/game_servers/update", {"name": name, "url": url})
+        response = self.post("/game_servers/update", {"name": name, "url": url, "id": self.id, "token": self.token})
 
         if not response:
             return False
