@@ -118,7 +118,7 @@ class Game:
 
         gameState = {
             "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name} for pid, p in self.socket_connections.items()},
-            "items": [ {"pos": list(p.pos), "type": p.item_type} for p in self.items]
+            "items": [ {"pos": list(p.pos), "type": p.item_type} for p in self.items],
             "projectiles": {pid: {"pos": list(p.pos), "angle": p.angle} for pid, p in self.projectiles.items()}
         }
 
