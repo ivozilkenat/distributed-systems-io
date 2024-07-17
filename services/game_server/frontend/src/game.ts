@@ -171,7 +171,7 @@ export class Game {
         let events = data.events;
         this.player.updatePosition(playerData[playerId]["pos"][0], playerData[playerId]["pos"][1]);
         this.player.hp = playerData[playerId]["hp"];
-        this.player.name = playerData[playerId]["name"];
+        this.player.changeName(playerData[playerId]["name"]);
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
 
@@ -195,7 +195,7 @@ export class Game {
                 this.enemies[id].hp = playerData[id]["hp"];
                 this.enemies[id].updateHealthBar();
             }
-            this.enemies[id].name = playerData[id]["name"];
+            this.enemies[id].changeName(playerData[id]["name"]);
             newPlayers[id] = this.enemies[id];
         });
 
