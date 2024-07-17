@@ -10,42 +10,49 @@
         "damage": 100,
         "cooldown": 1,
         "range": 2000,
-        "speed": 100
+        "speed": 100,
+        "spread": 0
     },
     "MP5": {
         "damage": 10,
         "cooldown": 0.05,
         "range": 500,
-        "speed": 50
+        "speed": 50,
+        "spread": 0.15
     },
     "Sniper Rifle": {
         "damage": 100,
         "cooldown": 1.5,
         "range": 3000,
-        "speed": 100
+        "speed": 100,
+        "spread": 0
     },
     "Flamethrower": {
         "damage": 1,
         "cooldown": 0.0000001,
         "range": 100,
-        "speed": 10
+        "speed": 10,
+        "spread": 0.3
     },
     "Shotgun": {
         "damage": 70,
         "cooldown": 0.8,
         "range": 300,
-        "speed": 40
+        "speed": 40,
+        "spread": 0.1
     },
     "Grenade Launcher": {
         "damage": 90,
         "cooldown": 1.2,
         "range": 1000,
-        "speed": 30
+        "speed": 30,
+        "spread": 0
     },
     "Laser Gun": {
         "damage": 40,
         "cooldown": 0.2,
         "range": 1500,
-        "speed": 200
+        "speed": 200,
+        "spread": 0.1
     }
 }
