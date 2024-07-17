@@ -24,11 +24,12 @@ def setup_route_handler(server: Server, database: Database):
             color = "green" if server["status"] == "HEALTHY" else "yellow" if server["status"] == "UNHEALTHY" else "gray"
             html = html + f'''
             <tr>
-                <td class="border px-4 py-2">{server['name']}</td>
-                <td class="border px-4 py-2">{server['url']}</td>
-                <td class="border px-4 py-2">{server['last_seen']}</td>
-                <td class="border px-4 py-2">{server['player_count']}</td>
-                <td class="border px-4 py-2">{server['status']}</td>
+                <td class="border px-4 py-2 name">{server['name']}</td>
+                <td class="border px-4 py-2 url">{server['url']}</td>
+                <td class="border px-4 py-2 last_seen">{server['last_seen']}</td>
+                <td class="border px-4 py-2 player_count">{server['player_count']}</td>
+                <td class="border px-4 py-2 status">{server['status']}</td>
+                <td class="border px-4 py-2 ping">-</td>
                 <td class="border px-4 py-2">
                     <a class="bg-{color}-500 text-white px-4 py-2 rounded hover:bg-{color}-700" href="{server['url']}" target="_blank">Connect</a>
                 </td>
