@@ -42,12 +42,21 @@ class Game:
 
     async def update_game_state(self) -> None:
         while True:
+            connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+
             # Logic to update the game state
             # For example, update player positions, check for collisions, etc.
             
+            self.move_projectiles()
+
+            self.check_collisions(connections)
+
+            for _, player in connections:
+                player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
+                player.currentmove = 0
             
             # Run this update at fixed intervals (e.g., 60 times per second)
-            #print("Updating game state")
+            # print("Updating game state")
             await asyncio.sleep(STATE_UPDATE_INTERVAL)
             
     async def broadcast_game_state(self) -> None:
@@ -85,21 +94,14 @@ class Game:
     async def update_players(self) -> None:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
 
-        self.move_projectiles()
-
-        self.check_collisions(connections)
-
         gameState = {
             "players": {pid: {"pos": list(p.pos), "hp": p.hp} for pid, p in self.socket_connections.items()},
             "projectiles": {pid: {"pos": list(p.pos)} for pid, p in self.projectiles.items()}
         }
 
         for player_id, player in connections: 
-            player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
-
-            # TODO: this is ugly, refactor
             await self.server.app.sio.emit("update_players", {
                 "gameState": gameState,
-                "canShoot": player.cooldown == 0,
+                "canShoot": player.cooldown <= 0,
                 "playerId": player_id
             }, room=player_id)

@@ -12,20 +12,13 @@ def setup_ws_handler(server: Server):
     @server.app.sio.on("player_move")
     async def player_move(sid, update):
         player = server.game.socket_connections[sid]
-        player.pos.x += update[0]
-        player.pos.y += update[1]
-        
-        # Prevent player from going out of bounds
-        # TODO: Canvas size is needed as constant? -> how to properly change these magic numbers everywhere?
-        player.pos.x = min(X_MAX, max(0, player.pos.x))
-        player.pos.y = min(Y_MAX, max(0, player.pos.y))
-       #  await server.game.update_players() #<- done by game
+        player.move(update)
 
 
     @server.app.sio.on("player_click")
     async def player_shoot(sid, angle):
         player = server.game.socket_connections[sid]
-        if player.cooldown == 0:
+        if player.cooldown <= 0:
             player.shoot(angle)
 
     @server.app.sio.on('connect')
