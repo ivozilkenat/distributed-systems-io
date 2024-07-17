@@ -121,6 +121,10 @@ class MatchmakingAPI:
         if not self.registerFromConstants() and DEPEND_ON_MATCHMAKING:
             sys.exit("Exiting now because DEPEND_ON_MATCHMAKING=1")
 
+        while not self.isRegistered():
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+            self.registerFromConstants()
+
         while self.isRegistered():
             i = 0
             while not self.ping() and i < PING_RETRIES and DEPEND_ON_MATCHMAKING:

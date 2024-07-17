@@ -6,6 +6,8 @@ from fastapi_socketio import SocketManager
 from typing import Dict
 from .player import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
+import random
+from .item import DamageItem, SpeedBoostItem, WeaponItem, spawn_randomly
 
 class Game:    
     def __init__(self, server) -> None:
@@ -13,6 +15,7 @@ class Game:
         self.socket_connections: Dict[str, Player] = {}
         self.projectiles: Dict[str, Player] = {}
         self.projectiles_to_destroy = []
+        self.items = []
         self.reset_events()
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
@@ -29,7 +32,8 @@ class Game:
     def _get_tasks(self):
         return [
             asyncio.create_task(self.update_game_state()), 
-            asyncio.create_task(self.broadcast_game_state())
+            asyncio.create_task(self.broadcast_game_state()),
+            asyncio.create_task(self.manage_items())
         ]
 
     def get_player_count(self):
@@ -96,6 +100,13 @@ class Game:
                 if projectile.is_collision(other_projectile):
                     projectile.destroy()
                     other_projectile.destroy()
+        for i in range(len(self.items) - 1, 0, -1):
+            item = self.items[i]
+            for _, player in players:
+                if player.is_collision(item):
+                    item.on_collision(player)
+                    self.items.pop(i)
+
 
         self.destroy_projectiles()
         
@@ -107,6 +118,7 @@ class Game:
 
         gameState = {
             "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name} for pid, p in self.socket_connections.items()},
+            "items": [ {"pos": list(p.pos), "type": p.item_type} for p in self.items],
             "projectiles": {pid: {"pos": list(p.pos), "angle": p.angle} for pid, p in self.projectiles.items()}
         }
 
@@ -129,3 +141,25 @@ class Game:
                 "leaderboard": sorted_leaderboard,
                 "playerId": player_id
             }, room=player_id)
+            
+    async def manage_items(self):
+        while True:
+            self.despawn_items()
+            self.respawn_items()
+            await asyncio.sleep(20)  # Despawn and respawn every 20 seconds
+
+    def despawn_items(self):
+        self.items.clear()
+
+    def respawn_items(self):
+        # Assuming you have a defined list or method of item types to spawn
+        for _ in range(random.randint(5, 10)):  # Random number of new items
+            item_type = random.choice([SpeedBoostItem, DamageItem, WeaponItem])
+            new_item = None
+            if item_type == WeaponItem:
+                w = random.choice(list(self.weapons.keys()))
+                new_item = WeaponItem(w)
+            else:
+                new_item = item_type()  # Assuming the constructor sets the position
+            spawn_randomly(new_item)
+            self.items.append(new_item)

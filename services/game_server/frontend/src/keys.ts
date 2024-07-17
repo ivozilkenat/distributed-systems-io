@@ -4,7 +4,7 @@ export function initializeKeyMapping(): Record<string, boolean> {
         KeyA: 'left', ArrowLeft: 'left',
         KeyS: 'down', ArrowDown: 'down',
         KeyD: 'right', ArrowRight: 'right',
-        Tab: 'tab'
+        Tab: 'tab', KeyT: 'tab'
     };
 
     const keys: Record<string, boolean> = {
