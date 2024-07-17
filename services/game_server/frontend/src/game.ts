@@ -3,7 +3,7 @@ import { Player } from './player.ts';
 import { Entity } from './entity.ts';
 import { popupMessageQueue } from './vfx.ts';
 import { Socket } from 'socket.io-client';
-import { CheckBox, List } from '@pixi/ui';
+import { List } from '@pixi/ui';
 
 export async function createApp(): Promise<PIXI.Application> {
     const app = new PIXI.Application();
@@ -229,9 +229,6 @@ export class Game {
             view.addChild(this.playerToLeaderboardText[i]);
         }
 
-
-        let graphics = new PIXI.Graphics();
-        const e = graphics.rect(0, 0, 500, 500).fill(0xFF00FF);
         view.visible = true;
         view.x = 50;
         view.y = 50;
