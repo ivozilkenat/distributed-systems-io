@@ -3,7 +3,7 @@ name: Deployment webhook (Matchmaking & Game)
 # Only trigger when the specified workflows have succeeded
 on:
   workflow_run:
-    workflows: ["build_image_game", "build_image_matchmaking"]
+    workflows: ['Build and Publish "Game" Docker Image', 'Build and Publish "Matchmaking" Docker Image']
     types:
       - completed
 
