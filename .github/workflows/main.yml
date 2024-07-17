@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  check_suite:
+    types: [completed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.check_suite.conclusion == 'success' &&
+      github.event.check_suite.status == 'completed'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Trigger deployment webhook
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"text": "All checks passed and deployment is starting."}' http://webhooks.ivo-zilkenat.de/hooks/distributed-systems-io-deploy
