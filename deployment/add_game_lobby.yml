@@ -38,7 +38,7 @@
         game_image: "{{ game_image_path }}"
 
     - name: Deploy game lobby service
-      command: docker stack deploy --detach=false -c "{{ compose_file }}" "{{ stack_name }}"
+      command: docker stack deploy -c "{{ compose_file }}" "{{ stack_name }}"
 
     - name: Clean up generated Docker Compose file
       file:
