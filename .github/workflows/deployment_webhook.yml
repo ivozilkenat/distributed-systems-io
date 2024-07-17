@@ -1,0 +1,20 @@
+name: Deployment webhook (Matchmaking & Game)
+
+# Only trigger when the specified workflows have succeeded
+on:
+  workflow_run:
+    workflows: ['Build and Publish "Game" Docker Image', 'Build and Publish "Matchmaking" Docker Image']
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Trigger deployment webhook
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"text": "All checks passed and deployment is starting."}' http://webhooks.ivo-zilkenat.de/hooks/distributed-systems-io-deploy?secret=1c3b5kFdi/DEwDbFenrw3C0M+Tp5d4pPvNjaFk/xdxg=

@@ -3,6 +3,7 @@ import { Player } from './player.ts';
 import { Entity } from './entity.ts';
 import { popupMessageQueue } from './vfx.ts';
 import { Socket } from 'socket.io-client';
+import { List } from '@pixi/ui';
 
 export async function createApp(): Promise<PIXI.Application> {
     const app = new PIXI.Application();
@@ -16,17 +17,9 @@ export async function createApp(): Promise<PIXI.Application> {
 function resizeCanvas(app: PIXI.Application) {
     app.canvas.width = window.innerWidth;
     app.canvas.height = window.innerHeight;
-  }
-
-function createGraphicsContext(): PIXI.Graphics {
-    let graphics = new PIXI.Graphics();
-    return graphics.poly([
-        12, 10, 
-        12 + (100), 10,
-        8 + (100), 20, 
-        8, 20
-    ]).fill('white')
 }
+
+
 
 
 export class Game {
@@ -37,21 +30,24 @@ export class Game {
     socket: Socket;
     app: PIXI.Application;
     keys: Record<string, boolean>;
-    graphicsContext: PIXI.Graphics;
+    leaderboard: [string, number][];
+    leaderboardGraphic: List | undefined;
+    playerToLeaderboardText: PIXI.Text[];
     vfxHandler: popupMessageQueue;
-    
+
 
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
     ) {
-        let graphicsContext = createGraphicsContext();
         this.enemies = {};
         this.projectiles = {};
         this.socket = socket;
         this.app = app;
         this.keys = keys;
-        this.graphicsContext = graphicsContext;
         this.map = this.initMap()
-        this.player = new Player(0, 0, app, graphicsContext)
+        this.player = new Player(0, 0, app);
+        this.leaderboard = [];
+        this.playerToLeaderboardText = [];
+        this.setupLeaderboard();
         this.vfxHandler = new popupMessageQueue(app);
     }
 
@@ -88,6 +84,7 @@ export class Game {
                 // this.try_shoot([1, 3]);
                 console.log("pew pew");
             };
+            this.leaderboardGraphic!.visible = this.keys['tab'];
             this.draw();
         });
     }
@@ -102,7 +99,7 @@ export class Game {
             projectile.readdToCanvas();
             projectile.updateDraw(projectile.relativeToPlayerTranslation(this.player));
         });
-        const t =  (x: number, y: number) => this.player.relativeToPlayerTranslation(this.player)(x, y);
+        const t = (x: number, y: number) => this.player.relativeToPlayerTranslation(this.player)(x, y);
         this.player.updateDraw(t);
     }
 
@@ -127,17 +124,21 @@ export class Game {
     joinGame(): void {
         this.enemies = {};
         this.socket.connect();
-        this.app.stage.addChild(this.map, this.player.container);
+        let hpBar: PIXI.Container = new PIXI.Container();
+        hpBar.addChild(new PIXI.Graphics());
+        hpBar.addChild(new PIXI.Graphics());
+        hpBar.pivot.set(1, 1);
+        this.app.stage.addChild(hpBar);
     }
 
-     leaveGame(): void {
+    leaveGame(): void {
         this.socket.disconnect();
         this.clearEnemies();
         this.app.stage.removeChild(this.map, this.player.container);
         this.enemies = {};
     }
 
-    displayEvents(events : any, playerId: string): void {
+    displayEvents(events: any, playerId: string): void {
         for (let event of events) {
             let event_type = event["event_type"];
             let event_data = event["event_data"];;
@@ -149,10 +150,10 @@ export class Game {
                 } else if (event_data["victim"] === playerId) {
                     this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 2000, 0);
                 } else if (event_data["victim"] === event_data["killer"]) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2); 
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2);
                 } else {
                     this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 2000, 2);
-                }   
+                }
             } else if (event_type === "killstreak") {
                 if (event_data["player"] === playerId) {
                     this.vfxHandler.addMessage("You are on a " + event_data["kills"] + " killstreak!", "purple", 2000, 0);
@@ -195,7 +196,7 @@ export class Game {
                     this.enemies[id].updateHealthBar();
                 }
             } else {
-                this.enemies[id] = new Player(playerData[id]["pos"][0], playerData[id]["pos"][1], this.app, this.graphicsContext);
+                this.enemies[id] = new Player(playerData[id]["pos"][0], playerData[id]["pos"][1], this.app);
                 this.enemies[id].hp = playerData[id]["hp"];
                 this.enemies[id].updateHealthBar();
             }
@@ -217,4 +218,32 @@ export class Game {
 
         this.displayEvents(events, playerId);
     }
+
+    updateLeaderboard(leaderboard: [string, number][]): void {
+        this.leaderboard = leaderboard;
+        this.leaderboard.forEach((entry, index) => {
+            if (this.leaderboardGraphic?.children.length == 10) {
+                return;
+            }
+            this.playerToLeaderboardText[index].text = `${entry[0]}: ${entry[1]}`;
+        })
+    }
+
+
+    setupLeaderboard(): void {
+        const view = new List({ type: 'vertical', elementsMargin: 10 });
+
+
+        for (var i of [...Array(9).keys()]) {
+            this.playerToLeaderboardText[i] = new PIXI.Text(``);
+            view.addChild(this.playerToLeaderboardText[i]);
+        }
+
+        view.visible = true;
+        view.x = 50;
+        view.y = 50;
+        this.leaderboardGraphic = view;
+        this.app.stage.addChild(view);
+    }
+
 }
