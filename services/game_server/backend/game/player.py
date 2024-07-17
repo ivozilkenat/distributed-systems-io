@@ -53,7 +53,7 @@ class Player (Entity):
             if type(source) == Player:
                 self.killed_by(source)
             seconds_alive = self.respawn_and_get_survival_time()
-            self.on_death(seconds_alive)
+            self.on_death(round(seconds_alive.total_seconds()))
 
     def killed(self, victim):
         if self != victim:
