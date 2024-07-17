@@ -84,8 +84,9 @@ export class Game {
             if (this.keys['down']) this.socket.emit('player_move', [0, 1]);
             if (this.keys['space']) {
                 // TODO fix this if you can
-                const mousePosition = (this.app.renderer.events as any).rootPointerEvent.global;
-                this.try_shoot([mousePosition.x, mousePosition.y]);
+                // const mousePosition = this.app.renderer.plugins.interaction.mouse.global; // @ts-ignore
+                // this.try_shoot([1, 3]);
+                console.log("pew pew");
             };
             this.draw();
         });
