@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Player } from './player.ts';
 import { Entity } from './entity.ts';
+import { popupMessageQueue } from './vfx.ts';
 import { Socket } from 'socket.io-client';
 
 export async function createApp(): Promise<PIXI.Application> {
@@ -37,6 +38,7 @@ export class Game {
     app: PIXI.Application;
     keys: Record<string, boolean>;
     graphicsContext: PIXI.Graphics;
+    vfxHandler: popupMessageQueue;
     
 
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
@@ -49,7 +51,8 @@ export class Game {
         this.keys = keys;
         this.graphicsContext = graphicsContext;
         this.map = this.initMap()
-        this.player = new Player(0, 0, app, graphicsContext);
+        this.player = new Player(0, 0, app, graphicsContext)
+        this.vfxHandler = new popupMessageQueue(app);
     }
 
     get gameSize(): number[] {
@@ -124,16 +127,45 @@ export class Game {
         this.enemies = {};
     }
 
+    displayEvents(events : any, playerId: string): void {
+        for (let event of events) {
+            let event_type = event["event_type"];
+            let event_data = event["event_data"];;
+            if (event_type === "kills") {
+                if (event_data["killer"] === playerId && event_data["victim"] === playerId) {
+                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 2000, 0);
+                } else if (event_data["killer"] === playerId) {
+                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 2000, 0);
+                } else if (event_data["victim"] === playerId) {
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 2000, 0);
+                } else if (event_data["victim"] === event_data["killer"]) {
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2); 
+                } else {
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 2000, 2);
+                }   
+            } else if (event_type === "killstreak") {
+                if (event_data["player"] === playerId) {
+                    this.vfxHandler.addMessage("You are on a " + event_data["kills"] + " killstreak!", "purple", 2000, 0);
+                } else {
+                    this.vfxHandler.addMessage(this.enemies[event_data["player"]].name + " is on a " + event_data["kills"] + " killstreak!", "white", 2000, 1);
+                }
+            }
+        }
+    }
+
     updateGameFromServer(data: {
         gameState: any,
         canShoot: boolean,
         playerId: string,
+        events: any
     }): void {
         let playerId = data.playerId;
         let playerData = data.gameState["players"]
         let projectileData = data.gameState["projectiles"]
+        let events = data.events;
         this.player.updatePosition(playerData[playerId]["pos"][0], playerData[playerId]["pos"][1]);
         this.player.hp = playerData[playerId]["hp"];
+        this.player.name = playerData[playerId]["name"];
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
 
@@ -157,6 +189,7 @@ export class Game {
                 this.enemies[id].hp = playerData[id]["hp"];
                 this.enemies[id].updateHealthBar();
             }
+            this.enemies[id].name = playerData[id]["name"];
             newPlayers[id] = this.enemies[id];
         });
 
@@ -171,5 +204,7 @@ export class Game {
 
         this.enemies = newPlayers;
         this.projectiles = newProjectiles;
+
+        this.displayEvents(events, playerId);
     }
 }

@@ -14,9 +14,19 @@ class Game:
         self.socket_connections: Dict[str, Player] = {}
         self.projectiles: Dict[str, Player] = {}
         self.projectiles_to_destroy = []
+        self.reset_events()
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
         
+    def reset_events(self):
+        self.latest_events = []
+    
+    def register_event(self, event_type, event_data):
+        self.latest_events.append({
+            "event_type": event_type,
+            "event_data": event_data
+        })
+
     def _get_tasks(self):
         return [
             asyncio.create_task(self.update_game_state()), 
@@ -95,7 +105,7 @@ class Game:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
 
         gameState = {
-            "players": {pid: {"pos": list(p.pos), "hp": p.hp} for pid, p in self.socket_connections.items()},
+            "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name} for pid, p in self.socket_connections.items()},
             "projectiles": {pid: {"pos": list(p.pos)} for pid, p in self.projectiles.items()}
         }
 
@@ -103,5 +113,8 @@ class Game:
             await self.server.app.sio.emit("update_players", {
                 "gameState": gameState,
                 "canShoot": player.cooldown <= 0,
-                "playerId": player_id
+                "playerId": player_id,
+                "events": self.latest_events
             }, room=player_id)
+
+        self.reset_events()
