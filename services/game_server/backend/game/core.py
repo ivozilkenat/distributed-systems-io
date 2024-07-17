@@ -38,15 +38,21 @@ class Pos:
         return distance
 
 class Entity:
+
     def __init__(self, pos: Pos) -> None:
         self.pos = pos
         self.hitbox_radius : int = 25
+        self.uuid = self.generate_uuid()
 
     def is_in_range_of(self, other, range) -> bool:
         return self.pos.distance_to(other.pos) <= range
     
     def is_collision(self, other) -> bool:
         return self.pos.distance_to(other.pos) <= self.hitbox_radius + other.hitbox_radius
+    
+    def generate_uuid(self):
+        integer_part, fractional_part = str(time.time()).split('.')
+        return integer_part[-3:] + fractional_part[:3] + str(random.randint(0, 1000))
 
 class Projectile (Entity):
     def __init__(self, pos: Pos, angle: float, speed: float, damage, maxrange, creator) -> None:
@@ -58,7 +64,6 @@ class Projectile (Entity):
         self.creator = creator
         self.maxrange = maxrange
         self.traveltime = 0
-        self.uuid = self.generate_uuid()
 
     def move(self):
         newpos = Pos(self.pos.x + self.speed * math.cos(self.angle), self.pos.y + self.speed * math.sin(self.angle))
@@ -97,16 +102,12 @@ class Projectile (Entity):
             self.pos.y = 0
         elif self.pos.y > Y_MAX:
             self.pos.y = Y_MAX
-
-    def generate_uuid(self):
-        integer_part, fractional_part = str(time.time()).split('.')
-        return integer_part[-3:] + fractional_part[:3] + str(random.randint(0, 1000))
     
     def destroy(self):
         self.creator.game.destroy_projectile(self)
 
 class Player (Entity):
-    def __init__(self, game, pos: Pos, hp: int = 100) -> None:
+    def __init__(self, game, pos: Pos, sid,  hp: int = 100) -> None:
         super().__init__(pos)
         self.game = game
         self.hp = hp
@@ -118,6 +119,7 @@ class Player (Entity):
         self.currentmove = 0
         self.maxmove = 12
         self.speed = 3
+        self.uuid = sid
 
     def move(self, update):
         dx, dy = update
@@ -152,16 +154,19 @@ class Player (Entity):
             self.on_death(seconds_alive)
 
     def killed(self, victim):
-        self.kills += 1
+        if self != victim:
+            self.kills += 1
+            if self.kills in [3, 5, 8, 10, 15]:
+                self.game.register_event("killstreak", {"player": self.uuid, "kills": self.kills})
+
         print(f"{self.name} sent {victim.name} to the shadow realm!")
-        # TODO communicate kill to frontend
     
     def killed_by(self, killer):
+        self.game.register_event("kills", {"killer": killer.uuid, "victim": self.uuid})
         killer.killed(self)
 
     def on_death(self, seconds_alive):
         self.game.server.matchmaking_api.addHighscore(self.name, self.kills, seconds_alive)
-        # TODO communicate death to frontend
     
     def shoot(self, angle):
         # emit a projectile into the angle, starting next to the player
