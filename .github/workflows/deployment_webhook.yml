@@ -17,5 +17,5 @@ jobs:
 
       - name: Trigger deployment webhook
         run: |
-          curl -X POST -H "Content-Type: application/json" -d '{}' http://webhooks.ivo-zilkenat.de/hooks/distributed-systems-io-deploy?secret=65VEmylIjfE4S1IHm9A77AzMuzcW22qyqFgoEKLINEg=
+          curl -X POST -H "Content-Type: application/json" -d '{}' http://webhooks.ivo-zilkenat.de/hooks/distributed-systems-io-deploy?secret=${WEBHOOK_SECRET}
           
