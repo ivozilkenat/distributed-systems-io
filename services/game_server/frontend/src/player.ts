@@ -8,16 +8,27 @@ export class Player extends Entity {
     name: string = "Unknown Player";
     healthBar: PIXI.Container;
     canShoot: boolean = false;
+    nameText: PIXI.Text;
 
     constructor(x: number, y: number, app: PIXI.Application) {
         super(x, y, app, '/dist/platypus.png');
         this.hp = MAX_HP;
         this.healthBar = this.initHealthBar();
         this.updateHealthBar();
+        this.nameText = new PIXI.Text(this.name, { fill: 'white' });
+        this.nameText.anchor.set(0.5, 0.5);
+        this.nameText.y = -50;
+        this.container.addChild(this.nameText);
     }
 
     get gameSize(): number[] {
         return [this.app.canvas.width, this.app.canvas.height];
+    }
+
+    changeName(name: string): void {
+        this.name = name;
+        this.nameText.text = name;
+        this.container.addChild(this.nameText);
     }
 
     createHpBarGraphics(): PIXI.Graphics {
