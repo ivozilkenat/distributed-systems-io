@@ -34,6 +34,7 @@ export class Game {
     leaderboardGraphic: List | undefined;
     playerToLeaderboardText: PIXI.Text[];
     vfxHandler: popupMessageQueue;
+    items: Record<string, Entity>;
 
 
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
@@ -49,6 +50,7 @@ export class Game {
         this.playerToLeaderboardText = [];
         this.setupLeaderboard();
         this.vfxHandler = new popupMessageQueue(app);
+        this.items = {};
     }
 
     get gameSize(): number[] {
@@ -66,7 +68,7 @@ export class Game {
     }
 
     try_shoot(pos: number[]): void {
-        if(this.player.canShoot) {
+        if (this.player.canShoot) {
             let angle = Math.atan2(pos[1] - this.gameSize[1] / 2, pos[0] - this.gameSize[0] / 2);
             this.socket.emit("player_click", angle);
         }
@@ -99,6 +101,10 @@ export class Game {
             projectile.readdToCanvas();
             projectile.updateDraw(projectile.relativeToPlayerTranslation(this.player));
         });
+        Object.values(this.items).forEach((item: Entity) => {
+            item.readdToCanvas();
+            item.updateDraw(item.relativeToPlayerTranslation(this.player));
+        });
         const t = (x: number, y: number) => this.player.relativeToPlayerTranslation(this.player)(x, y);
         this.player.updateDraw(t);
     }
@@ -121,6 +127,11 @@ export class Game {
         });
     }
 
+    clearItems(): void {
+        Object.values(this.items).forEach((projectile: Entity) => {
+            projectile.removeFromCanvas();
+        });
+    }
     joinGame(): void {
         this.enemies = {};
         this.socket.connect();
@@ -173,6 +184,7 @@ export class Game {
         let playerId = data.playerId;
         let playerData = data.gameState["players"]
         let projectileData = data.gameState["projectiles"]
+        let itemData = data.gameState["items"]
         let events = data.events;
         this.player.updatePosition(playerData[playerId]["pos"][0], playerData[playerId]["pos"][1]);
         this.player.hp = playerData[playerId]["hp"];
@@ -185,6 +197,7 @@ export class Game {
 
         this.clearEnemies();
         this.clearProjectiles();
+        this.clearItems();
 
         Object.keys(playerData).forEach(id => {
 
@@ -212,6 +225,20 @@ export class Game {
             }
             newProjectiles[id] = this.projectiles[id];
         });
+
+        const addedItems: Record<string, Entity> = {};
+
+        this.items = addedItems;
+        Object.keys(itemData).forEach(id => {
+            if (this.items[id]) {
+                this.items[id].updatePosition(itemData[id]["pos"][0], itemData[id]["pos"][1]);
+            } else {
+                // Assuming you have an Item class to handle different item types
+                this.items[id] = new Entity(itemData[id]["pos"][0], itemData[id]["pos"][1], this.app, '/dist/bullet.png');
+            }
+            addedItems[id] = this.items[id];
+        });
+
 
         this.enemies = newPlayers;
         this.projectiles = newProjectiles;

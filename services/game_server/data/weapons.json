@@ -7,7 +7,7 @@
     },
     "Rocket Launcher": {
         "damage": 80,
-        "cooldown": 50,
+        "cooldown": 1,
         "range": 2000,
         "speed": 500
     }
