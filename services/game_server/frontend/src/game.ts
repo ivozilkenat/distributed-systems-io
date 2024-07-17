@@ -208,7 +208,7 @@ export class Game {
             if (this.projectiles[id]) {
                 this.projectiles[id].updatePosition(projectileData[id]["pos"][0], projectileData[id]["pos"][1]);
             } else {
-                this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png');
+                this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png', projectileData[id]["angle"]);
             }
             newProjectiles[id] = this.projectiles[id];
         });
