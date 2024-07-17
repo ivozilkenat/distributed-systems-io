@@ -1,6 +1,6 @@
 from backend.server import Server
-from backend.game.core import Pos, Player, random_position
-from backend.game.core import X_MAX, Y_MAX
+from backend.game.core import Pos, random_position, X_MAX, Y_MAX
+from backend.game.player import Player 
 
 # TODO: Maybe replace with sessions? Research required, https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers
 # TODO: Please no magic numbers everywhere
@@ -24,12 +24,5 @@ def setup_ws_handler(server: Server):
     @server.app.sio.on('connect')
     async def client_side_receive_msg(sid, env):
         server.game.socket_connections[sid] = Player(server.game, Pos(random_position(X_MAX), random_position(Y_MAX)), sid)
-        server.matchmaking_api.ping()
-        await server.game.update_players()
-
-
-    @server.app.sio.on('disconnect')
-    async def client_side_receive_msg(sid):
-        del server.game.socket_connections[sid]
         server.matchmaking_api.ping()
         await server.game.update_players()

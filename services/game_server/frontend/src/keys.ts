@@ -3,7 +3,8 @@ export function initializeKeyMapping(): Record<string, boolean> {
         Space: 'space', KeyW: 'up', ArrowUp: 'up',
         KeyA: 'left', ArrowLeft: 'left',
         KeyS: 'down', ArrowDown: 'down',
-        KeyD: 'right', ArrowRight: 'right'
+        KeyD: 'right', ArrowRight: 'right',
+        Tab: 'tab'
     };
 
     const keys: Record<string, boolean> = {
