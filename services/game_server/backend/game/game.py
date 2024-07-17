@@ -100,7 +100,7 @@ class Game:
                 if projectile.is_collision(other_projectile):
                     projectile.destroy()
                     other_projectile.destroy()
-        for i in range(len(self.items) - 1, 0, -1):
+        for i in range(len(self.items) - 1, -1, -1):
             item = self.items[i]
             for _, player in players:
                 if player.is_collision(item):
