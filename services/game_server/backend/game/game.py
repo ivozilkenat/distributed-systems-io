@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 from typing import Dict
-from .core import Player
+from .player import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
 
 
