@@ -5,14 +5,15 @@ import time
 import random
 import math
 from backend.constants import X_MAX, Y_MAX
-import names
+from unique_names_generator import get_random_name
+from unique_names_generator.data import ADJECTIVES, ANIMALS
 
 class Player (Entity):
     def __init__(self, game, pos: Pos, sid,  hp: int = 100) -> None:
         super().__init__(pos)
         self.game = game
         self.hp = hp
-        self.name = names.get_full_name()
+        self.name = get_random_name(combo=[ADJECTIVES, ANIMALS], separator=" ")
         self.kills = 0
         self.last_respawned_at = datetime.datetime.now()
         self.equipped_weapon = "Pistol"

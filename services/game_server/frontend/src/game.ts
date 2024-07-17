@@ -124,11 +124,6 @@ export class Game {
     joinGame(): void {
         this.enemies = {};
         this.socket.connect();
-        let hpBar: PIXI.Container = new PIXI.Container();
-        hpBar.addChild(new PIXI.Graphics());
-        hpBar.addChild(new PIXI.Graphics());
-        hpBar.pivot.set(1, 1);
-        this.app.stage.addChild(hpBar);
     }
 
     leaveGame(): void {
