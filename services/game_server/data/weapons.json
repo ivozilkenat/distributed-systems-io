@@ -10,5 +10,11 @@
         "cooldown": 1,
         "range": 2000,
         "speed": 500
+    },
+    "MP5": {
+        "damage": 10,
+        "cooldown": 0.05,
+        "range": 500,
+        "speed": 50
     }
 }
