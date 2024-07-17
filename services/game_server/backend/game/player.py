@@ -3,6 +3,7 @@ from .core import Entity, Pos, get_random_position
 from .projectile import Projectile
 import math
 from backend.constants import X_MAX, Y_MAX
+import random
 from unique_names_generator import get_random_name
 from unique_names_generator.data import ADJECTIVES, ANIMALS
 
@@ -70,6 +71,7 @@ class Player(Entity):
 
     def shoot(self, angle):
         weapon = self.game.weapons[self.equipped_weapon]
+        angle = angle * (1 + random.uniform(- weapon["spread"], weapon["spread"]))
         self.cooldown = weapon["cooldown"]
         distance = 50
         new_pos = Pos(self.pos.x + distance * math.cos(angle), self.pos.y + distance * math.sin(angle))

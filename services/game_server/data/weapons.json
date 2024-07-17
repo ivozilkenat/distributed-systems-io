@@ -3,7 +3,8 @@
         "damage": 25,
         "cooldown": 0.25,
         "range": 2000,
-        "speed": 25
+        "speed": 25,
+        "spread": 0.05
     },
     "Rocket Launcher": {
         "damage": 100,
