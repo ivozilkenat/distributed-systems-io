@@ -35,7 +35,7 @@ export class Game {
     playerToLeaderboardText: PIXI.Text[];
     vfxHandler: popupMessageQueue;
     items: Record<string, Entity>;
-
+    currentAim: number[];
 
     constructor(app: PIXI.Application, socket: Socket, keys: Record<string, boolean>
     ) {
@@ -51,6 +51,7 @@ export class Game {
         this.setupLeaderboard();
         this.vfxHandler = new popupMessageQueue(app);
         this.items = {};
+        this.currentAim = [0, 0];
     }
 
     get gameSize(): number[] {
@@ -62,13 +63,25 @@ export class Game {
         this.app.stage.addChild(map);
         map.interactive = true;
         map.on('click', (evt: any) => {
-            this.try_shoot([evt.data.global.x, evt.data.global.y]);
+            this.currentAim = [evt.data.global.x, evt.data.global.y]
+            this.try_shoot();
+        });
+        map.on('mousemove', (evt: any) => {
+            this.currentAim = [evt.data.global.x, evt.data.global.y];
+        });
+        map.on('mousedown', (evt: any) => {
+            this.currentAim = [evt.data.global.x, evt.data.global.y];
+            this.keys['space'] = true;
+        });
+        map.on('mouseup', () => {
+            this.keys['space'] = false;
         });
         return map;
     }
 
-    try_shoot(pos: number[]): void {
+    try_shoot(): void {
         if (this.player.canShoot) {
+            const pos = this.currentAim;
             let angle = Math.atan2(pos[1] - this.gameSize[1] / 2, pos[0] - this.gameSize[0] / 2);
             this.socket.emit("player_click", angle);
         }
@@ -83,8 +96,8 @@ export class Game {
             if (this.keys['space']) {
                 // TODO fix this if you can
                 // const mousePosition = this.app.renderer.plugins.interaction.mouse.global; // @ts-ignore
-                // this.try_shoot([1, 3]);
-                console.log("pew pew");
+                this.try_shoot();
+                // console.log("pew pew");
             };
             this.leaderboardGraphic!.visible = this.keys['tab'];
             this.draw();

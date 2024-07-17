@@ -3,18 +3,21 @@
         "damage": 25,
         "cooldown": 0.25,
         "range": 2000,
-        "speed": 25
+        "speed": 25,
+        "spread": 0.05
     },
     "Rocket Launcher": {
         "damage": 80,
         "cooldown": 1,
         "range": 2000,
-        "speed": 500
+        "speed": 500,
+        "spread": 0
     },
     "MP5": {
         "damage": 10,
         "cooldown": 0.05,
         "range": 500,
-        "speed": 50
+        "speed": 50,
+        "spread": 0.15
     }
 }
