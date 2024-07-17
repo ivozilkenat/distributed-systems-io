@@ -144,15 +144,15 @@ export class Game {
             let event_data = event["event_data"];;
             if (event_type === "kills") {
                 if (event_data["killer"] === playerId && event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 2000, 0);
+                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 1500, 0);
                 } else if (event_data["killer"] === playerId) {
-                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 2000, 0);
+                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 1500, 0);
                 } else if (event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 2000, 0);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 1500, 0);
                 } else if (event_data["victim"] === event_data["killer"]) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 1500, 2);
                 } else {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 1500, 2);
                 }
             } else if (event_type === "killstreak") {
                 if (event_data["player"] === playerId) {
