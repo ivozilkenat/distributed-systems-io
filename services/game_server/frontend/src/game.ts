@@ -216,6 +216,7 @@ export class Game {
             if (this.projectiles[id]) {
                 this.projectiles[id].updatePosition(projectileData[id]["pos"][0], projectileData[id]["pos"][1]);
             } else {
+
                 this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png', projectileData[id]["angle"]);
             }
             newProjectiles[id] = this.projectiles[id];
@@ -229,7 +230,19 @@ export class Game {
                 this.items[id].updatePosition(itemData[id]["pos"][0], itemData[id]["pos"][1]);
             } else {
                 // Assuming you have an Item class to handle different item types
-                this.items[id] = new Entity(itemData[id]["pos"][0], itemData[id]["pos"][1], this.app, '/dist/bullet.png');
+                let itemImage = '/dist/pistol.png'
+                switch (itemData[id]["type"]) {
+                    case "weapon":
+                        itemImage = '/dist/pistol.png'
+                        break;
+                    case "damage":
+                        itemImage = '/dist/health.png'
+                        break;
+                    case "speed":
+                        itemImage = '/dist/speed.png'
+                        break;
+                }
+                this.items[id] = new Entity(itemData[id]["pos"][0], itemData[id]["pos"][1], this.app, itemImage);
             }
             addedItems[id] = this.items[id];
         });
