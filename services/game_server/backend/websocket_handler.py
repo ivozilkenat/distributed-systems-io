@@ -1,6 +1,6 @@
 from backend.server import Server
-from backend.game.core import Pos, Player, random_position
-from backend.game.core import X_MAX, Y_MAX
+from backend.game.core import Pos, random_position, X_MAX, Y_MAX
+from backend.game.player import Player 
 
 # TODO: Maybe replace with sessions? Research required, https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers
 # TODO: Please no magic numbers everywhere
