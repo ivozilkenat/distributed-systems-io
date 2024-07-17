@@ -19,6 +19,6 @@
         set -a
         source .env
         set +a
-        docker stack deploy --detach=false -c ./core_services/docker-compose.yml {{ stack_name }}
+        docker stack deploy -c ./core_services/docker-compose.yml {{ stack_name }}
       args:
         executable: /bin/bash

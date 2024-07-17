@@ -135,11 +135,6 @@ export class Game {
     joinGame(): void {
         this.enemies = {};
         this.socket.connect();
-        let hpBar: PIXI.Container = new PIXI.Container();
-        hpBar.addChild(new PIXI.Graphics());
-        hpBar.addChild(new PIXI.Graphics());
-        hpBar.pivot.set(1, 1);
-        this.app.stage.addChild(hpBar);
     }
 
     leaveGame(): void {
@@ -155,15 +150,15 @@ export class Game {
             let event_data = event["event_data"];;
             if (event_type === "kills") {
                 if (event_data["killer"] === playerId && event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 2000, 0);
+                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 1500, 0);
                 } else if (event_data["killer"] === playerId) {
-                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 2000, 0);
+                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 1500, 0);
                 } else if (event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 2000, 0);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 1500, 0);
                 } else if (event_data["victim"] === event_data["killer"]) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 1500, 2);
                 } else {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 1500, 2);
                 }
             } else if (event_type === "killstreak") {
                 if (event_data["player"] === playerId) {
@@ -188,7 +183,7 @@ export class Game {
         let events = data.events;
         this.player.updatePosition(playerData[playerId]["pos"][0], playerData[playerId]["pos"][1]);
         this.player.hp = playerData[playerId]["hp"];
-        this.player.name = playerData[playerId]["name"];
+        this.player.changeName(playerData[playerId]["name"]);
         this.player.updateHealthBar();
         this.player.canShoot = data.canShoot;
 
@@ -213,7 +208,7 @@ export class Game {
                 this.enemies[id].hp = playerData[id]["hp"];
                 this.enemies[id].updateHealthBar();
             }
-            this.enemies[id].name = playerData[id]["name"];
+            this.enemies[id].changeName(playerData[id]["name"]);
             newPlayers[id] = this.enemies[id];
         });
 
@@ -221,7 +216,7 @@ export class Game {
             if (this.projectiles[id]) {
                 this.projectiles[id].updatePosition(projectileData[id]["pos"][0], projectileData[id]["pos"][1]);
             } else {
-                this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png');
+                this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png', projectileData[id]["angle"]);
             }
             newProjectiles[id] = this.projectiles[id];
         });
