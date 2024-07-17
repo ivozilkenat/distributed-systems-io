@@ -1,0 +1,46 @@
+---
+- name: Add Game Lobby
+  hosts: localhost
+  vars:
+    lobby_id: ""
+    compose_file: "./game_services/docker-compose_{{ lobby_id }}.yml"
+
+  tasks:
+    - name: Set environment variables as facts
+      set_fact:
+        app_matchmaking_host: "{{ lookup('env', 'APP_MATCHMAKING_SERVER') }}"
+        domain: "{{ lookup('env', 'DOMAIN') }}"
+        game_image_path: "{{ lookup('env', 'GAME_IMAGE') }}"
+        stack_name: "{{ lookup('env', 'STACK_NAME_GAME_LOBBIES') }}"
+        compose_template: "{{ lookup('env', 'COMPOSE_TMP_GAME') }}"
+
+#    - name: Debug environment variables
+#      debug:
+#        msg:
+#          - "DOMAIN: {{ matchmaking_domain }}"
+#          - "GAME_IMAGE: {{ game_image_path }}"
+#          - "STACK_NAME: {{ stack_name }}"
+#          - "COMPOSE_TEMPLATE: {{ compose_template }}"
+
+    - name: Validate ID
+      fail:
+        msg: "ID must be provided."
+      when: lobby_id == ""
+
+    - name: Generate Docker Compose file from template
+      template:
+        src: "{{ compose_template }}"
+        dest: "{{ compose_file }}"
+      vars:
+        id: "{{ lobby_id }}"
+        app_matchmaking_host: "{{ app_matchmaking_host }}"
+        domain: "{{ domain }}"
+        game_image: "{{ game_image_path }}"
+
+    - name: Deploy game lobby service
+      command: docker stack deploy --detach=false -c "{{ compose_file }}" "{{ stack_name }}"
+
+    - name: Clean up generated Docker Compose file
+      file:
+        path: "{{ compose_file }}"
+        state: absent

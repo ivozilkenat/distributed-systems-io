@@ -1,0 +1,61 @@
+services:
+  traefik:
+    image: traefik:v2.4
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  db:
+    image: ${DATABASE_IMAGE}
+    env_file:
+      - ../.env
+    volumes:
+      - database:/var/lib/mysql:Z
+    networks:
+      - backend
+
+  matchmaking:
+    image: ${MATCHMAKING_IMAGE}
+    env_file:
+      - ../.env
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.matchmaking.rule=Host(`${DOMAIN}`)"
+        - "traefik.http.routers.matchmaking.entrypoints=web"
+        - "traefik.http.services.matchmaking.loadbalancer.server.port=3000"
+
+networks:
+  backend:
+    driver: overlay
+
+volumes:
+  database:

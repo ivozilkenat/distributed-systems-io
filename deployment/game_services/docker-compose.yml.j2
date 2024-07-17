@@ -1,0 +1,26 @@
+services:
+  game_lobby_{{ id }}:
+    image: {{ game_image }}
+    environment:
+      APP_MATCHMAKING_HOST: "{{ app_matchmaking_host }}"
+      SERVER_NAME: "{{ id }}"
+      SERVER_URL: "http://{{ id }}.{{ domain }}"
+      # Optional, if you want to reappear as an existing server
+      # - SERVER_ID: 1
+      # - SERVER_TOKEN: <uuid-token-here>
+    networks:
+      - core_services_backend
+    stop_signal: SIGINT
+    depends_on:
+      - matchmaking
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.game_lobby_{{ id }}.rule=Host(`{{ id }}.{{ domain }}`)"
+        - "traefik.http.routers.game_lobby_{{ id }}.entrypoints=web"
+        - "traefik.http.services.game_lobby_{{ id }}.loadbalancer.server.port=3001"
+
+networks:
+  core_services_backend:
+    external: true
+

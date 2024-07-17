@@ -1,0 +1,13 @@
+services:
+  registry:
+    image: registry:2
+    restart: unless-stopped
+    ports:
+      - target: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
