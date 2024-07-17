@@ -53,8 +53,9 @@ class Player(Entity):
         if self.hp <= 0:
             if isinstance(source, Player):
                 source.killed(self)
+            total_kills_before_respawn = self.kills
             seconds_alive = self.respawn_and_get_survival_time()
-            self.on_death(round(seconds_alive.total_seconds()))
+            self.game.server.matchmaking_api.addHighscore(self.name, total_kills_before_respawn, round(seconds_alive.total_seconds()))
 
     def killed(self, victim):
         if self != victim:
@@ -66,9 +67,6 @@ class Player(Entity):
     def killed_by(self, killer):
         self.game.register_event("kills", {"killer": killer.uuid, "victim": self.uuid})
         killer.killed(self)
-
-    def on_death(self, seconds_alive):
-        self.game.server.matchmaking_api.addHighscore(self.name, self.kills, seconds_alive)
 
     def shoot(self, angle):
         weapon = self.game.weapons[self.equipped_weapon]
