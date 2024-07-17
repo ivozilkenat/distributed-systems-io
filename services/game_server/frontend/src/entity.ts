@@ -11,8 +11,9 @@ export class Entity {
     container: PIXI.Container;
     spritePath: string;
     app: PIXI.Application;
+    rotation: number;
 
-    constructor(x: number, y: number, app: PIXI.Application, spritePath: string) {
+    constructor(x: number, y: number, app: PIXI.Application, spritePath: string, rotation = 0) {
         this.x = x;
         this.y = y;
         this.targetX = x;
@@ -20,6 +21,7 @@ export class Entity {
         this.lastUpdateTime = Date.now();
         this.app = app;
         this.spritePath = spritePath;
+        this.rotation = rotation;
         this.container = this.initContainer();
     }
 
@@ -38,6 +40,7 @@ export class Entity {
         const sprite: PIXI.Sprite = PIXI.Sprite.from(this.spritePath);
         sprite.anchor.set(0.5, 0.5);
         sprite.scale.set(0.1, 0.1); //TODO remove magic numbers
+        sprite.rotation = this.rotation;
         return sprite;
     }
 
