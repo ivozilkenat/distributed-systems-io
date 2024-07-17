@@ -12,6 +12,8 @@ class SpeedBoostItem(Entity):
         player.increase_speed_by(1)
         print("Speed: " + str(player._speed))
         
+    def on_event_message(self) -> str:
+        return ""
 
 class DamageItem(Entity):
     def __init__(self) -> None:
@@ -23,6 +25,9 @@ class DamageItem(Entity):
     
         print("HP: " + str(player.hp))
         
+    def on_event_message(self) -> str:
+        return ""
+        
         
 class WeaponItem(Entity):
     def __init__(self, weapon_type) -> None:
@@ -33,6 +38,9 @@ class WeaponItem(Entity):
     def on_collision(self, player: Player):
         player.equipped_weapon = self.weapon_type
         print("Weapon: " + str(self.weapon_type))
+    
+    def on_event_message(self) -> str:
+        return self.weapon_type
         
 def spawn_randomly(entity: Entity):
     x_position = random.randint(0, X_MAX)

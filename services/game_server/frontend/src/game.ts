@@ -166,6 +166,8 @@ export class Game {
                 } else {
                     this.vfxHandler.addMessage(this.enemies[event_data["player"]].name + " is on a " + event_data["kills"] + " killstreak!", "white", 2000, 1);
                 }
+            } else if (event_type == "item") {
+                this.vfxHandler.addMessage(event_data, "purple", 2000, 0);
             }
         }
     }
@@ -264,7 +266,6 @@ export class Game {
         })
     }
 
-
     setupLeaderboard(): void {
         const view = new List({ type: 'vertical', elementsMargin: 10 });
 
@@ -280,5 +281,6 @@ export class Game {
         this.leaderboardGraphic = view;
         this.app.stage.addChild(view);
     }
+
 
 }

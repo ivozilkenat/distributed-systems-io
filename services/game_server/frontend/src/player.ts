@@ -19,6 +19,7 @@ export class Player extends Entity {
         this.nameText.anchor.set(0.5, 0.5);
         this.nameText.y = -50;
         this.container.addChild(this.nameText);
+
     }
 
     get gameSize(): number[] {

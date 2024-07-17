@@ -105,6 +105,7 @@ class Game:
             for _, player in players:
                 if player.is_collision(item):
                     item.on_collision(player)
+                    self.register_event("item", item.on_event_message())
                     self.items.pop(i)
 
 
@@ -117,7 +118,7 @@ class Game:
         await self.broadcast_leaderboard()
 
         gameState = {
-            "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name} for pid, p in self.socket_connections.items()},
+            "players": {pid: {"pos": list(p.pos), "hp": p.hp, "name": p.name, "weapon": p.equipped_weapon} for pid, p in self.socket_connections.items()},
             "items": [ {"pos": list(p.pos), "type": p.item_type} for p in self.items],
             "projectiles": {pid: {"pos": list(p.pos), "angle": p.angle} for pid, p in self.projectiles.items()}
         }
