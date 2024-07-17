@@ -2,7 +2,7 @@
     "Pistol": {
         "damage": 25,
         "cooldown": 1,
-        "range": 5000,
+        "range": 2000,
         "speed": 50
     },
     "Rocket Launcher": {

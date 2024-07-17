@@ -13,6 +13,7 @@ class Game:
         self.server = server
         self.socket_connections: Dict[str, Player] = {}
         self.projectiles: Dict[str, Player] = {}
+        self.projectiles_to_destroy = []
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
         
@@ -26,8 +27,18 @@ class Game:
         return len(self.socket_connections)
     
     def add_projectile(self, projectile):
-        print(f"Adding projectile {projectile.uuid}")
         self.projectiles[projectile.uuid] = projectile
+
+    def destroy_projectile(self, projectile):
+        self.projectiles_to_destroy.append(projectile.uuid)
+
+    def destroy_projectiles(self):
+        self.projectiles_to_destroy = list(set(self.projectiles_to_destroy))
+       
+        for projectile in self.projectiles_to_destroy:
+            del self.projectiles[projectile]
+
+        self.projectiles_to_destroy = []
 
     async def update_game_state(self) -> None:
         while True:
@@ -55,24 +66,21 @@ class Game:
         
 
     def check_collisions(self, players) -> None:
-        projectiles_to_destroy = []
         for _, projectile in self.projectiles.items():
             for _, player in players:
                 if player.is_collision(projectile):
                     player.take_damage(projectile.damage, projectile.creator)
-                    projectiles_to_destroy.append(projectile.uuid)
+                    projectile.destroy()
 
             for _, other_projectile in self.projectiles.items():
                 if projectile.uuid == other_projectile.uuid:
                     continue
                 if projectile.is_collision(other_projectile):
-                    projectiles_to_destroy.append(projectile.uuid)
-                    projectiles_to_destroy.append(other_projectile.uuid)
+                    projectile.destroy()
+                    other_projectile.destroy()
 
-        projectiles_to_destroy = list(set(projectiles_to_destroy))
-       
-        for projectile in projectiles_to_destroy:
-            del self.projectiles[projectile]
+        self.destroy_projectiles()
+        
 
     async def update_players(self) -> None:
         connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 

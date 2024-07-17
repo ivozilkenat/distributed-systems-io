@@ -138,6 +138,7 @@ export class Game {
         this.player.canShoot = data.canShoot;
 
         const newPlayers: Record<string, Player> = {};
+        const newProjectiles: Record<string, Entity> = {};
 
         this.clearEnemies();
         this.clearProjectiles();
@@ -165,8 +166,10 @@ export class Game {
             } else {
                 this.projectiles[id] = new Entity(projectileData[id]["pos"][0], projectileData[id]["pos"][1], this.app, '/dist/bullet.png');
             }
+            newProjectiles[id] = this.projectiles[id];
         });
 
         this.enemies = newPlayers;
+        this.projectiles = newProjectiles;
     }
 }

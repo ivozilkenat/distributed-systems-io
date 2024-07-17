@@ -49,22 +49,30 @@ class Entity:
         return self.pos.distance_to(other.pos) <= self.hitbox_radius + other.hitbox_radius
 
 class Projectile (Entity):
-    def __init__(self, pos: Pos, angle: float, speed: float, damage, creator) -> None:
+    def __init__(self, pos: Pos, angle: float, speed: float, damage, maxrange, creator) -> None:
         super().__init__(pos)
         self.angle = angle
         self.speed = speed
         self.hitbox_radius = 5
         self.damage = damage
         self.creator = creator
+        self.maxrange = maxrange
+        self.traveltime = 0
         self.uuid = self.generate_uuid()
 
     def move(self):
         self.pos.x += self.speed * math.cos(self.angle)
         self.pos.y += self.speed * math.sin(self.angle)
+        self.traveltime += self.speed
+        if self.traveltime >= self.maxrange:
+            self.destroy()
 
     def generate_uuid(self):
         integer_part, fractional_part = str(time.time()).split('.')
         return integer_part[-3:] + fractional_part[:3] + str(random.randint(0, 1000))
+    
+    def destroy(self):
+        self.creator.game.destroy_projectile(self)
 
 class Player (Entity):
     def __init__(self, game, pos: Pos, hp: int = 100) -> None:
@@ -115,6 +123,5 @@ class Player (Entity):
         weapon = self.game.weapons[self.equipped_weapon]
         distance = 100
         new_pos = Pos(self.pos.x + distance * math.cos(angle), self.pos.y + distance * math.sin(angle))
-        new_projectile = Projectile(new_pos, angle, weapon["speed"], weapon["damage"], self)
+        new_projectile = Projectile(new_pos, angle, weapon["speed"], weapon["damage"], weapon["range"], self)
         self.game.add_projectile(new_projectile)
-        print(f"Spawned projectile {new_projectile.uuid} at {new_projectile.pos}")
