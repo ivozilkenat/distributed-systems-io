@@ -70,7 +70,7 @@ class popupMessage extends PIXI.Text {
     constructor(content: string, colour: string, droptime: number, app: PIXI.Application, handler: popupMessageQueue) {
         super(content, {fill: colour, fontSize: 64});
         this.anchor.set(0.5, 0.5);
-        this.droptime = 3 * droptime / droptime;
+        this.droptime = droptime;
         this.app = app;
         this.spawnPos = [this.app.renderer.width / 2, 100];
         this.handler = handler;
@@ -84,27 +84,28 @@ class popupMessage extends PIXI.Text {
         this.alpha = 1;
         this.app.stage.addChild(this);
         // move down slowly
+        // log current time
         this.app.ticker.add(() => {
             this.move();
         });
     }
 
     move() {
-        this.lifeTime += 1 / 30;
+        this.lifeTime += this.app.ticker.deltaMS;
         let t = this.lifeTime / this.droptime;
 
         let f1 = (t: number) => 0.7834*t**4 + 0.8224*t**3 + 0.6357*t**2 + -0.1860*t**1
         let f2 = (t: number) => 3.2973*t**4 + -1.0792*t**3 + -3.1441*t**2 + -1.9411*t**1 + 3.7671
 
-        if(this.lifeTime > this.droptime) {
-                this.app.stage.removeChild(this);
-                this.app.ticker.remove(this.move);
-        }
-
         this.y = this.spawnPos[1] + this.bounceFactor * (t <= 0.8 ? f1(t) : f2(t));
         if(t > 0.8) {
             this.alpha = 1 - (t - 0.8) / 0.2;
         }
+
+        if(this.lifeTime > this.droptime) {
+            this.app.stage.removeChild(this);
+            this.app.ticker.remove(this.move);
+    }
     }
 
 }

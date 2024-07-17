@@ -60,12 +60,16 @@ export class Game {
         this.app.stage.addChild(map);
         map.interactive = true;
         map.on('click', (evt: any) => {
-            if (this.player.canShoot) {
-                let angle = Math.atan2(evt.data.global.y - this.gameSize[1] / 2, evt.data.global.x - this.gameSize[0] / 2);
-                this.socket.emit("player_click", angle);
-            }
+            this.try_shoot([evt.data.global.x, evt.data.global.y]);
         });
         return map;
+    }
+
+    try_shoot(pos: number[]): void {
+        if(this.player.canShoot) {
+            let angle = Math.atan2(pos[1] - this.gameSize[1] / 2, pos[0] - this.gameSize[0] / 2);
+            this.socket.emit("player_click", angle);
+        }
     }
 
     loop(): void {
@@ -74,6 +78,12 @@ export class Game {
             if (this.keys['left']) this.socket.emit('player_move', [-1, 0]);
             if (this.keys['up']) this.socket.emit('player_move', [0, -1]);
             if (this.keys['down']) this.socket.emit('player_move', [0, 1]);
+            if (this.keys['space']) {
+                // TODO fix this if you can
+                // const mousePosition = this.app.renderer.plugins.interaction.mouse.global; // @ts-ignore
+                // this.try_shoot([1, 3]);
+                console.log("pew pew");
+            };
             this.leaderboardGraphic!.visible = this.keys['tab'];
             this.draw();
         });
@@ -134,15 +144,15 @@ export class Game {
             let event_data = event["event_data"];;
             if (event_type === "kills") {
                 if (event_data["killer"] === playerId && event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 2000, 0);
+                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 1500, 0);
                 } else if (event_data["killer"] === playerId) {
-                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 2000, 0);
+                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 1500, 0);
                 } else if (event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 2000, 0);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 1500, 0);
                 } else if (event_data["victim"] === event_data["killer"]) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 1500, 2);
                 } else {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 2000, 2);
+                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 1500, 2);
                 }
             } else if (event_type === "killstreak") {
                 if (event_data["player"] === playerId) {
