@@ -10,7 +10,7 @@
         "damage": 100,
         "cooldown": 1,
         "range": 2000,
-        "speed": 70,
+        "speed": 60,
         "spread": 0
     },
     "MP5": {
@@ -24,12 +24,12 @@
         "damage": 100,
         "cooldown": 1.5,
         "range": 3000,
-        "speed": 70,
+        "speed": 60,
         "spread": 0
     },
     "Flamethrower": {
-        "damage": 1,
-        "cooldown": 0.0000001,
+        "damage": 2,
+        "cooldown": 0.0001,
         "range": 100,
         "speed": 10,
         "spread": 0.3
