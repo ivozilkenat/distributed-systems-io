@@ -79,6 +79,8 @@ class Player(Entity):
             print(f"{self.name} sent {victim.name} to the shadow realm!")
 
     def killed_by(self, killer):
+        self._max_moves = 12
+        self._speed = 3
         self.reset_to_standard_weapon()
         self.game.register_event("kills", {"killer": killer.uuid, "victim": self.uuid})
         killer.killed(self)
