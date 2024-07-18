@@ -53,7 +53,7 @@ class Player(Entity):
         self.hp -= damage
         if self.hp <= 0:
             if isinstance(source, Player):
-                source.killed(self)
+                self.killed_by(source)
             total_kills_before_respawn = self.kills
             seconds_alive = self.respawn_and_get_survival_time()
             self.game.server.matchmaking_api.addHighscore(self.name, total_kills_before_respawn, round(seconds_alive.total_seconds()))
