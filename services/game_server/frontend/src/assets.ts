@@ -9,6 +9,7 @@ export async function loadAssets() {
     await PIXI.Assets.load('/dist/pistol.png');
     await PIXI.Assets.load('/dist/health.png');
     await PIXI.Assets.load('/dist/speed.png');
+    await PIXI.Assets.load('/dist/explosion.json');
 }
 
 export const leaveButton = PIXI.Sprite.from('/dist/leaveButton.png');

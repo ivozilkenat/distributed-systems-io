@@ -153,6 +153,8 @@ export class Game {
     leaveGame(): void {
         this.socket.disconnect();
         this.clearEnemies();
+        this.clearProjectiles();
+        this.clearItems();
         this.app.stage.removeChild(this.map, this.player.container);
         this.enemies = {};
     }
@@ -162,27 +164,57 @@ export class Game {
             let event_type = event["event_type"];
             let event_data = event["event_data"];;
             if (event_type === "kills") {
-                if (event_data["killer"] === playerId && event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 1500, 0);
-                } else if (event_data["killer"] === playerId) {
-                    this.vfxHandler.addMessage("You sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "purple", 1500, 0);
-                } else if (event_data["victim"] === playerId) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent you to the shadow realm!", "red", 1500, 0);
-                } else if (event_data["victim"] === event_data["killer"]) {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " offed themselves", "white", 1500, 2);
-                } else {
-                    this.vfxHandler.addMessage(this.enemies[event_data["killer"]].name + " sent " + this.enemies[event_data["victim"]].name + " to the shadow realm!", "white", 1500, 2);
-                }
+                this.processKillMessage(event_data["killer"], event_data["victim"], playerId);
             } else if (event_type === "killstreak") {
-                if (event_data["player"] === playerId) {
-                    this.vfxHandler.addMessage("You are on a " + event_data["kills"] + " killstreak!", "purple", 2000, 0);
-                } else {
-                    this.vfxHandler.addMessage(this.enemies[event_data["player"]].name + " is on a " + event_data["kills"] + " killstreak!", "white", 2000, 1);
-                }
-            } else if (event_type == "item" && event_data["player"] === playerId) {
-                this.vfxHandler.addMessage(event_data["msg"], "purple", 2000, 0);
+                this.processKillStreakMessage(event_data["player"], event_data["kills"], playerId);
+            } else if (event_type === "item") {
+                this.processItemMessage(event_data["msg"], playerId);
+            } else if (event_type === "disconnect") {
+                this.processDisconnectMessage(event_data["player"]);
             }
         }
+    }
+
+    processDisconnectMessage(player: string): void {
+        if (player) {
+            return;
+        }
+        // this.vfxHandler.addMessage(this.enemies[player].name + " disconnected", "white", 2000, 2);
+        // this.enemies[player].removeFromCanvas();
+        // delete this.enemies[player];
+    }
+
+    processItemMessage(data: any, playerId: string): void {
+        if (data["player"] === playerId) {
+            this.vfxHandler.addMessage(data["msg"], "green", 2000, 0);
+    }}
+
+    processKillStreakMessage(player: string, kills: number, playerId: string): void {
+        if (player === playerId) {
+            this.vfxHandler.addMessage("You are on a " + kills + " killstreak!", "purple", 2000, 0);
+        } else {
+            this.vfxHandler.addMessage(this.enemies[player].name + " is on a " + kills + " killstreak!", "white", 2000, 1);
+    }}
+
+    processKillMessage(killer: string, victim: string, playerId: string): void {
+        if (killer === victim) {
+            if (killer === playerId) {
+                this.vfxHandler.addMessage("You killed yourself! Idiot", "red", 1500, 0);
+            }
+            else {
+                this.vfxHandler.addMessage(this.enemies[killer].name + " offed themselves", "white", 1500, 2);
+            }
+        } else if (killer === playerId) {
+            this.vfxHandler.addMessage("You sent " + this.enemies[victim].name + " to the shadow realm!", "purple", 1500, 0);
+        } else if (victim === playerId) {
+            this.vfxHandler.addMessage(this.enemies[killer].name + " sent you to the shadow realm!", "red", 1500, 0);
+        } else {
+            this.vfxHandler.addMessage(this.enemies[killer].name + " sent " + this.enemies[victim].name + " to the shadow realm!", "white", 1500, 2);
+    }}
+
+    kicked(reason: string): void {
+        this.vfxHandler.addMessage("kicked due to: " + reason, "red", 2000, 0);
+        this.leaveGame();
     }
 
     updateGameFromServer(data: {

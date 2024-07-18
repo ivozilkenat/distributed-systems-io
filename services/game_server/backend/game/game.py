@@ -1,12 +1,13 @@
 import asyncio
 import json
+import random
 import os
+import time
 from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 from typing import Dict
 from .player import Player
 from backend.constants import STATE_UPDATE_INTERVAL, BROADCAST_INTERVAL, DATA_DIR
-import random
 from .item import DamageItem, SpeedBoostItem, WeaponItem, spawn_randomly
 
 class Game:    
@@ -19,7 +20,8 @@ class Game:
         self.reset_events()
         with open(os.path.join(DATA_DIR, "weapons.json")) as f:
             self.weapons = json.load(f)
-        
+    
+    
     def reset_events(self):
         self.latest_events = []
     
@@ -56,6 +58,7 @@ class Game:
     async def update_game_state(self) -> None:
         while True:
             connections = list(self.socket_connections.items()) # Size might change during iteration because of disconnects 
+            players_to_remove = []
 
             # Logic to update the game state
             # For example, update player positions, check for collisions, etc.
@@ -65,9 +68,16 @@ class Game:
             self.check_collisions(connections)
 
             for _, player in connections:
+                if player.lastActed + player.timeout < time.time():
+                    players_to_remove.append(player)
                 player.cooldown = max(0, player.cooldown - STATE_UPDATE_INTERVAL)
                 player.currentmove = 0
             
+            for player in players_to_remove:
+                await self.server.app.sio.emit("kicked", {"reason": "idling"}, room=player.uuid)
+                self.socket_connections.pop(player.uuid)
+                self.register_event("disconnect", {"player": player.uuid})
+
             # Run this update at fixed intervals (e.g., 60 times per second)
             # print("Updating game state")
             await asyncio.sleep(STATE_UPDATE_INTERVAL)

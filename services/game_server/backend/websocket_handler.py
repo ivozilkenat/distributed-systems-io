@@ -29,4 +29,7 @@ def setup_ws_handler(server: Server):
 
     @server.app.sio.on('disconnect')
     async def player_disconnected(sid):
-        del server.game.socket_connections[sid]
+        try: 
+            del server.game.socket_connections[sid]
+        except KeyError:
+            pass
