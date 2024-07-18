@@ -27,7 +27,7 @@
                         <th class="px-4 py-2 text-left">Action</th>
                     </tr>
                 </thead>
-                <tbody id="game-server-tbody" hx-get="/servers" hx-trigger="load" hx-swap="innerHTML">
+                <tbody id="game-server-tbody" hx-get="/servers" hx-trigger="load, every 5s" hx-swap="innerHTML">
                     <tr>
                         <td class="border px-4 py-2" colspan="2">Loading...</td>
                     </tr>
@@ -51,7 +51,7 @@
                         <th class="px-4 py-2 text-left">Time</th>
                     </tr>
                 </thead>
-                <tbody id="highscores-tbody" hx-get="/highscores_html" hx-trigger="load" hx-swap="innerHTML">
+                <tbody id="highscores-tbody" hx-get="/highscores_html" hx-trigger="load, every 5s" hx-swap="innerHTML">
                     <tr>
                         <td class="border px-4 py-2" colspan="5">Loading...</td>
                     </tr>

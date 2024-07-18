@@ -179,8 +179,8 @@ export class Game {
                 } else {
                     this.vfxHandler.addMessage(this.enemies[event_data["player"]].name + " is on a " + event_data["kills"] + " killstreak!", "white", 2000, 1);
                 }
-            } else if (event_type == "item") {
-                this.vfxHandler.addMessage(event_data, "purple", 2000, 0);
+            } else if (event_type == "item" && event_data["player"] === playerId) {
+                this.vfxHandler.addMessage(event_data["msg"], "purple", 2000, 0);
             }
         }
     }

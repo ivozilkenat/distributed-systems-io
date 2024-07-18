@@ -10,20 +10,19 @@ class SpeedBoostItem(Entity):
         self.item_type = "speed"
     def on_collision(self, player: Player):
         player.increase_speed_by(1)
-        print("Speed: " + str(player._speed))
         
     def on_event_message(self) -> str:
         return ""
 
+# Yeah its an health item. IDC
 class DamageItem(Entity):
     def __init__(self) -> None:
         super().__init__(Pos(0,0))
         self.item_type = "damage"
         
     def on_collision(self, player: Player):
-        player.hp = max(player.hp - 1, 1)
-    
-        print("HP: " + str(player.hp))
+        player.hp = min(player.hp + 10, 100)
+
         
     def on_event_message(self) -> str:
         return ""
@@ -37,7 +36,6 @@ class WeaponItem(Entity):
         
     def on_collision(self, player: Player):
         player.equipped_weapon = self.weapon_type
-        print("Weapon: " + str(self.weapon_type))
     
     def on_event_message(self) -> str:
         return self.weapon_type
