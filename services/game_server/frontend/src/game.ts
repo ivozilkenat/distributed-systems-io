@@ -168,7 +168,7 @@ export class Game {
             } else if (event_type === "killstreak") {
                 this.processKillStreakMessage(event_data["player"], event_data["kills"], playerId);
             } else if (event_type === "item") {
-                this.processItemMessage(event_data["msg"], playerId);
+                this.processItemMessage(event_data, playerId);
             } else if (event_type === "disconnect") {
                 this.processDisconnectMessage(event_data["player"]);
             }
