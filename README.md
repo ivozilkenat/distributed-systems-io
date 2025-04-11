@@ -1,68 +1,132 @@
 # Distributed-Systems-IO
 
+A 2D multiplayer game with a dynamic lobby system. Lobbies are created on demand and dynamically spun up as new instances behind a Traefik reverse proxy. This architecture showcases core concepts of distributed systems and was built with scalability and modularity in mind.
+
 ---
 
-## Deployment
+## 🧱 Tech Stack
 
-### Production - *Automatic*
-- Push to branch `main`
-  - Wait for action to build package & web server to run container
-- View at [https://distr-sys-io.ivo-zilkenat.de/](https://distr-sys-io.ivo-zilkenat.de/)
+![image](https://github.com/user-attachments/assets/86adc25a-19eb-4696-982f-364c141fd380)
 
-### Full Setup - *Manual*
+### 📦 Services
+<!-- Insert image showing the structure of the game_server, matchmaking, database, etc. -->
+![image](https://github.com/user-attachments/assets/13620968-5461-4466-a44a-ce5f5f7dade6)
 
-##### Dependencies
+### 🚀 Deployment Overview
+<!-- Insert image showing automatic deployment pipeline (GitHub Actions, container, swarm, etc.) -->
+![image](https://github.com/user-attachments/assets/e1163b74-3ad1-4a10-83ea-77ff356f7873)
+![image](https://github.com/user-attachments/assets/a028a222-fc75-4efc-a047-31b134b3b87b)
+
+---
+
+## 🖥️ Server Setup
+<!-- Insert image showing server infrastructure, e.g., manager node, swarm nodes, docker/traefik layout -->
+![image](https://github.com/user-attachments/assets/03f5fd76-c003-475c-9956-061bd25d81c1)
+
+---
+
+## 🔄 Service Communication
+<!-- Insert image/diagram showing the data flow between services: matchmaking ↔ game server ↔ database -->
+![image](https://github.com/user-attachments/assets/f29ac9d9-45f7-4364-80ac-95080e69ab0c)
+
+---
+
+## 🔍 Server Browser Example
+<!-- Insert image showing what the user sees when browsing for lobbies -->
+![image](https://github.com/user-attachments/assets/4a73ba70-63e3-49d8-a115-2d823e580e75)
+
+---
+
+## 🚀 Deployment
+
+### 🌐 Production – *Automatic*
+- Push to the `main` branch
+  - A GitHub Action will build the package and instruct the web server to run the container
+- Access the app at: [https://distr-sys-io.ivo-zilkenat.de/](https://distr-sys-io.ivo-zilkenat.de/)
+
+---
+
+### 🛠️ Full Setup – *Manual*
+
+#### ✅ Dependencies
+Make sure you have the following installed:
 1. `docker`
 2. `ansible`
 3. `python3-dotenv-cli`
-4. `git` (pre-installed on many Linux distros)
-5. `make` (pre-installed on many Linux distros)
+4. `git` (pre-installed on most Linux distributions)
+5. `make` (pre-installed on most Linux distributions)
 
-##### Setup
+#### ⚙️ Setup
 
-1. Clone project 
-2. Configure environment variables `cp local.env ./deployment/.env` (e.g. `DOMAIN`, ...)
-3. `cd` into `./deployment` directory
-4. Join docker swarm cluster
-   1. If not cluster present, create one and use current machine as master node: `docker swarm init --advertise-addr 127.0.0.1´
-`
+1. Clone the project.
+2. Configure environment variables:  
+   `cp local.env ./deployment/.env`  
+   (Set values like `DOMAIN`, etc.)
+3. Change into the deployment directory:  
+   `cd ./deployment`
+4. Join a Docker Swarm cluster:
+   - If no cluster is present, initialize one and use the current machine as the master node:  
+     ```bash
+     docker swarm init --advertise-addr 127.0.0.1
+     ```
 
-##### Actions
+#### 🚦 Actions
 
-*Deploy using local container (e.g. your code changes in game_server or app_matchmaking_host):*
-* Please use the images and domain environmental variables as listed in localhost.env in your deployment/.env file
-* Then run `make deploy-local`
+**Deploy using local containers (e.g. for testing code changes in `game_server` or `app_matchmaking_host`):**
+- Ensure image and domain variables are set in `deployment/.env` based on `localhost.env`
+- Run:  
+  ```bash
+  make deploy-local
+  ```
 
-*Deploy*
-* Run `make deploy`
+**Deploy:**
+```bash
+make deploy
+```
 
-*Undeployment*
-* Run `make rm-all`
+**Undeploy:**
+```bash
+make rm-all
+```
 
-*Scaling*
-* Add lobby `make lobby_id=your_name_here add-lobby`
+**Scale (e.g. add a new lobby instance):**
+```bash
+make lobby_id=your_name_here add-lobby
+```
 
-### Minimal testable setup
+---
 
-*Run database:*
-+ Go into services/database
-+ Run `docker compose up`
+## 🧪 Minimal Testable Setup
 
-Run the matchmaking server:
-+ Go into services/app_matchmaking_host
-+ Activate venv (e.g. with `source backend/venv/bin/activate`)
-+ Run server with `python main.py`
+**Run the Database:**
+```bash
+cd services/database
+docker compose up
+```
 
-*Run _a_ game server:*
-+ Go into services/game_server
-+ Activate venv (e.g. with `source venv/bin/activate`)
-+ Optional: Customize environment variables (with `export {VARIABLE_NAME}={VARIABLE_VALUE}`)
-  + `DEPEND_ON_MATCHMAKING`: Set to 0 if you want the game server to start without the matchmaking server 
-  + `HOST`: Host name of the Server, defaults to 0.0.0.0, but could (should) be `localhost` for example
-  + `PORT`: Port of the Server, defaults to 3001
-  + `SERVER_NAME`: Name of the lobby which gets sent to the app_matchmaking_host, defaults to `Unbekannt`
-  + `SERVER_URL`: The url of the lobby which gets sent to the app_matchmaking_host, defaults to `http://{HOST}:{PORT}`
-  + Credentials `SERVER_ID` and `SERVER_TOKEN`, not set by default
-    Only use these, if you want to re log into the matchmaking_server, you probably do not need them.
-  + `CREDENTIALS_FILE`: The file where credentials are saved to, defaults to `DATA_DIR/credentials.json`
-+ Run server with `python main.py`
+**Run the Matchmaking Server:**
+```bash
+cd services/app_matchmaking_host
+source backend/venv/bin/activate  # Adjust path if necessary
+python main.py
+```
+
+**Run a Game Server:**
+```bash
+cd services/game_server
+source venv/bin/activate  # Adjust path if necessary
+```
+
+Optional environment variables:
+- `DEPEND_ON_MATCHMAKING=0` – Start without matchmaking dependency
+- `HOST=localhost` – Host address (default: `0.0.0.0`)
+- `PORT=3001` – Port number
+- `SERVER_NAME=Unbekannt` – Lobby name
+- `SERVER_URL=http://{HOST}:{PORT}` – Lobby URL
+- `SERVER_ID` and `SERVER_TOKEN` – Credentials for reconnecting to matchmaking (optional)
+- `CREDENTIALS_FILE=DATA_DIR/credentials.json` – Where credentials are saved
+
+Start the server:
+```bash
+python main.py
+```
